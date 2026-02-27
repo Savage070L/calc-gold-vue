@@ -1,126 +1,37 @@
 <template>
-  <div class="reserves-table" v-if="result">
-    <h2 class="section-title">Резервы и бонусы по годам</h2>
+  <div class="reserves-table" v-if="result?.reserves?.length">
 
-    <!-- Переключатель вкладок -->
-    <div class="tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="tab-btn"
-        :class="{ active: activeTab === tab.key }"
-        @click="activeTab = tab.key"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
+    <!-- Toggle button -->
+    <button class="toggle-btn" @click="showTable = !showTable">
+      <span class="btn-icon">📋</span>
+      <span>Таблица выкупной суммы</span>
+      <InfoTooltip v-bind="TIP.table" />
+      <span class="btn-arrow">{{ showTable ? '▲' : '▼' }}</span>
+    </button>
 
-    <!-- Таблица резервов -->
-    <div v-if="activeTab === 'reserves'" class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Год</th>
-            <th>Возраст</th>
-            <th>Резерв</th>
-            <th>Выкупная сумма</th>
-            <th>Ax:n_k</th>
-            <th>ax:n_k</th>
-            <th>ax:t_k</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in result.reserves" :key="row.year">
-            <td>{{ row.year }}</td>
-            <td>{{ row.age }}</td>
-            <td class="money">{{ fmt(row.reserve) }}</td>
-            <td class="money">{{ fmt(row.surrender) }}</td>
-            <td class="mono">{{ fmt6(row.Ax_n_k) }}</td>
-            <td class="mono">{{ fmt6(row.ax_n_k) }}</td>
-            <td class="mono">{{ fmt6(row.ax_t_k) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Таблица бонусов -->
-    <div v-if="activeTab === 'bonuses'" class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Год</th>
-            <th>Бонус (KZT)</th>
-            <th>Прирост бонусной СС</th>
-            <th>Накопл. бонусная СС</th>
-            <th>Итоговая СС с бонусами</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in result.bonuses" :key="row.year">
-            <td>{{ row.year }}</td>
-            <td class="money">{{ row.bonus > 0 ? fmt(row.bonus) : '—' }}</td>
-            <td class="money">{{ row.bonusSAIncrement > 0 ? fmt(row.bonusSAIncrement) : '—' }}</td>
-            <td class="money">{{ row.cumulativeBonusSA > 0 ? fmt(row.cumulativeBonusSA) : '—' }}</td>
-            <td class="money bold">{{ fmt(row.totalSAWithBonus) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Сводная таблица (резервы + бонусы) -->
-    <div v-if="activeTab === 'combined'" class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Год</th>
-            <th>Возраст</th>
-            <th>Выкупная сумма</th>
-            <th>Бонус</th>
-            <th>СС с бонусами</th>
-            <th>Пониж. СС (reduced SA)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, i) in combined" :key="row.year">
-            <td>{{ row.year }}</td>
-            <td>{{ row.age }}</td>
-            <td class="money">{{ fmt(row.surrender) }}</td>
-            <td class="money">{{ row.bonus > 0 ? fmt(row.bonus) : '—' }}</td>
-            <td class="money bold">{{ fmt(row.totalSAWithBonus) }}</td>
-            <td class="money">{{ fmt(row.reducedSA) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Аннуитет (если есть) -->
-    <div v-if="result.annuity && result.annuity.annuityPayment > 0" class="annuity-block">
-      <h3 class="sub-title">Аннуитет</h3>
-      <div class="params-grid">
-        <div class="param-row">
-          <span>Аннуитетная выплата</span>
-          <span class="bold">{{ fmt(result.annuity.annuityPayment) }}</span>
-        </div>
-        <div class="param-row">
-          <span>Аннуитетный коэффициент (a)</span>
-          <span>{{ fmt6(result.annuity.annuityFactor) }}</span>
-        </div>
-        <div class="param-row">
-          <span>Гарантированная часть</span>
-          <span>{{ fmt6(result.annuity.guaranteedPart) }}</span>
-        </div>
-        <div class="param-row">
-          <span>Накопительная часть</span>
-          <span>{{ fmt6(result.annuity.lifePart) }}</span>
-        </div>
-        <div class="param-row">
-          <span>Срок выплат</span>
-          <span>{{ result.annuity.annuityTerm }} лет</span>
-        </div>
-        <div class="param-row">
-          <span>Гарантированный период</span>
-          <span>{{ result.annuity.guaranteedPeriod }} лет</span>
-        </div>
+    <!-- Table (collapsible) -->
+    <div v-if="showTable" class="table-card">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="th-year">Год <InfoTooltip v-bind="TIP.colYear" /></th>
+              <th class="th-date">Дата <InfoTooltip v-bind="TIP.colDate" /></th>
+              <th class="th-age">Возраст <InfoTooltip v-bind="TIP.colAge" /></th>
+              <th class="th-surrender">Выкупная сумма <InfoTooltip v-bind="TIP.colSurrender" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, idx) in tableRows" :key="row.year" :class="{ even: idx % 2 === 0 }">
+              <td class="col-year">{{ row.year }}</td>
+              <td class="col-date">{{ policyDate(row.year) }}</td>
+              <td class="col-age">{{ row.age }}</td>
+              <td class="col-surrender">
+                {{ fmtP(row.surrender) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -130,150 +41,213 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { formatMoney } from '../composables/useInsuranceCalc.js';
+import { useCurrencyRate } from '../composables/useCurrencyRate.js';
+import InfoTooltip from './InfoTooltip.vue';
 
-const props = defineProps({
-  result: { type: Object, default: null },
-});
+const { usdRate, currencyMode, toUsdStr } = useCurrencyRate();
 
-const tabs = [
-  { key: 'combined', label: 'Сводная' },
-  { key: 'reserves', label: 'Резервы' },
-  { key: 'bonuses',  label: 'Бонусы'  },
-];
-const activeTab = ref('combined');
+const isUsdMode = computed(() => currencyMode.value === 'USD' && !!usdRate.value);
 
-const combined = computed(() => {
-  if (!props.result?.reserves || !props.result?.bonuses) return [];
-  return props.result.reserves.map((r, i) => ({
-    ...r,
-    ...(props.result.bonuses[i] ?? {}),
-  }));
-});
-
-function fmt(val) {
-  return formatMoney(val, 'KZT');
+function fmtP(kzt) {
+  return isUsdMode.value ? (toUsdStr(kzt) ?? fmt(kzt)) : fmt(kzt);
 }
 
-function fmt6(val) {
-  if (val === null || val === undefined) return '—';
-  return Number(val).toFixed(6);
+const TIP = {
+  table: {
+    title: 'Таблица выкупной суммы',
+    text: '<b>Выкупная сумма</b> — это ваши <b>накопленные средства</b> на каждую конкретную дату полиса.<br><br>Таблица показывает, сколько капитала вы сформируете к каждому году. В начале накопления только набирают темп — это нормально. Год за годом капитал уверенно растёт.<br><br>Для максимального результата рекомендуется держать полис до конца срока или не менее <b>5–7 лет</b>.',
+  },
+  colYear: {
+    title: 'Год страхования',
+    text: 'Порядковый номер года с момента начала накоплений по полису.<br><br>Год <b>1</b> — первый год формирования капитала, год <b>20</b> — последний для полиса сроком 20 лет.',
+  },
+  colDate: {
+    title: 'Дата',
+    text: 'Конкретная дата завершения каждого года страхования (годовщина заключения договора).<br><br>Именно на эту дату рассчитывается размер ваших накопленных средств.',
+  },
+  colAge: {
+    title: 'Возраст',
+    text: 'Ваш возраст на дату завершения каждого года накоплений.<br><br>Используйте этот столбец, чтобы видеть: в каком возрасте вы достигнете той или иной суммы накоплений.',
+  },
+  colSurrender: {
+    title: 'Выкупная сумма',
+    text: 'Ваш накопленный капитал к данному году полиса.<br><br>• В первые годы может быть чуть ниже суммы взносов — накопления только набирают темп<br>• Год за годом уверенно растёт<br>• К концу срока достигает <b>максимального значения</b> — это ваш итоговый капитал',
+  },
+};
+
+const props = defineProps({ result: { type: Object, default: null } });
+
+const showTable = ref(true);
+
+const tableRows = computed(() => props.result?.reserves ?? []);
+
+function policyDate(yearNum) {
+  const base = props.result?.calcDate || new Date().toISOString().slice(0, 10);
+  const [y, m, d] = base.split('-');
+  return `${d}.${m}.${parseInt(y, 10) + yearNum}`;
 }
+
+function fmt(v) { return formatMoney(v, 'KZT'); }
 </script>
 
 <style scoped>
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #1a1a2e;
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.sub-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 1.25rem 0 0.6rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* Вкладки */
-.tabs {
-  display: flex;
-  gap: 0.35rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.tab-btn {
-  padding: 0.35rem 0.85rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: #f9fafb;
-  font-size: 0.82rem;
+/* ── Toggle button ─────────────────── */
+.toggle-btn {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px;
+  background: var(--surface, #F5F8FF);
+  border: 1px solid var(--border-color, rgba(25,118,210,0.14));
+  border-radius: 16px;
+  font-size: 15px; font-weight: 600;
+  color: var(--text-main, #1A2E3F);
   cursor: pointer;
-  font-weight: 500;
-  color: #374151;
-  transition: all 0.15s;
+  box-shadow: var(--shadow-out);
+  transition: all 0.2s ease;
+  text-align: left;
 }
-
-.tab-btn.active {
-  background: #4f46e5;
-  color: #fff;
-  border-color: #4f46e5;
+.toggle-btn:hover {
+  background: var(--primary-pale, #E3F2FD);
+  border-color: var(--primary, #1976D2);
+  color: var(--primary, #1976D2);
 }
+.btn-icon { font-size: 18px; }
+.toggle-btn span:nth-child(2) { flex: 1; }
+.btn-arrow { font-size: 11px; color: var(--text-light, #5A7A96); }
 
-.tab-btn:hover:not(.active) {
-  background: #f0f0ff;
-  border-color: #c7d2fe;
+/* ── Table card ────────────────────── */
+.table-card {
+  background: var(--surface, #F5F8FF);
+  border-radius: 16px;
+  box-shadow: var(--shadow-out);
+  animation: slideDown 0.3s ease-out both;
+  overflow: hidden;
+  margin-top: 6px;
 }
-
-/* Таблица */
 .table-wrapper {
   overflow-x: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
-table {
+/* ── Table ─────────────────────────── */
+.data-table {
   width: 100%;
+  min-width: 620px;
+  table-layout: fixed;       /* equal column widths */
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-family: 'SF Mono', 'Menlo', monospace;
 }
 
-thead tr {
-  background: #f3f4f6;
+/* Blue header */
+.data-table thead tr {
+  background: linear-gradient(135deg, #1565C0, #1976D2);
+}
+.data-table th {
+  color: white;
+  padding: 13px 12px;
+  text-align: center;
+  font-weight: 700; font-size: 13px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  white-space: normal;
+  border: none;
+  width: 25%;   /* all 4 columns equal */
 }
 
-th {
-  padding: 0.55rem 0.75rem;
-  text-align: left;
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
+/* Rows */
+.data-table tbody tr {
+  border-bottom: 1px solid rgba(25, 118, 210, 0.12);
+  transition: background 0.13s ease;
+}
+.data-table tbody tr.even td {
+  background: rgba(25, 118, 210, 0.04);
+}
+.data-table tbody tr:hover td {
+  background: var(--primary-pale, #E3F2FD);
 }
 
-td {
-  padding: 0.45rem 0.75rem;
-  border-top: 1px solid #f3f4f6;
-  color: #374151;
-  white-space: nowrap;
+.data-table td {
+  padding: 11px 12px;
+  text-align: center;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 16px; font-weight: 600;
+  color: var(--text-main, #1A2E3F);
+  border: none;
+  border-right: 1px solid rgba(25, 118, 210, 0.08);
+}
+.data-table td:last-child { border-right: none; }
+
+/* Year — bold blue */
+.col-year {
+  font-size: 18px; font-weight: 800;
+  color: #1565C0;
 }
 
-tbody tr:nth-child(even) { background: #fafafa; }
-tbody tr:hover           { background: #f0f0ff; }
-
-.money { text-align: right; font-variant-numeric: tabular-nums; }
-.mono  { font-family: monospace; font-size: 0.78rem; }
-.bold  { font-weight: 600; }
-
-/* Аннуитет */
-.annuity-block {
-  margin-top: 1.5rem;
+/* Date — same weight/font as others, slightly muted */
+.col-date {
+  font-size: 16px; font-weight: 600;
+  color: #3A5A7A;
 }
 
-.params-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem 1rem;
+/* Age — same as base td */
+.col-age {
+  font-size: 16px; font-weight: 600;
 }
 
-@media (max-width: 600px) {
-  .params-grid { grid-template-columns: 1fr; }
+/* Surrender value */
+.col-surrender {
+  font-size: 18px; font-weight: 700;
+  color: #1B5E20;
 }
 
-.param-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.3rem 0.5rem;
-  border-radius: 5px;
-  font-size: 0.82rem;
-  color: #374151;
+/* Info button inside blue header — white style */
+.data-table th :deep(.info-btn) {
+  border-color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.7);
+  opacity: 1;
+}
+.data-table th :deep(.info-btn:hover),
+.data-table th :deep(.info-btn.active) {
+  background: rgba(255,255,255,0.25);
+  border-color: white;
+  color: white;
+  transform: scale(1.1);
+}
+/* Info button in toggle button row */
+.toggle-btn :deep(.info-btn) {
+  border-color: rgba(25,118,210,0.5);
+  color: rgba(25,118,210,0.6);
+}
+.toggle-btn :deep(.info-btn:hover),
+.toggle-btn :deep(.info-btn.active) {
+  background: #1976D2;
+  border-color: #1976D2;
+  color: white;
 }
 
-.param-row:nth-child(odd) { background: #f9fafb; }
+@media (max-width: 720px) {
+  .toggle-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .data-table th {
+    font-size: 12px;
+    padding: 10px 8px;
+  }
+
+  .data-table td {
+    font-size: 14px;
+    padding: 10px 8px;
+  }
+
+  .col-year,
+  .col-surrender {
+    font-size: 16px;
+  }
+}
 </style>

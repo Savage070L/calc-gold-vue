@@ -251,7 +251,7 @@ export class RidersCalculator {
     }
 
     // Fixed-sum допы (пользователь задаёт сумму покрытия)
-    const fixedRiders = ['trauma', 'temporary_disability', 'hospitalization'];
+    const fixedRiders = ['trauma', 'hospitalization'];
     for (const riderName of fixedRiders) {
       const sel = ridersSelection[riderName] ?? {};
       if (sel.enabled) {
@@ -266,21 +266,6 @@ export class RidersCalculator {
           totalRiderPremium += r.riderPremium;
         }
       }
-    }
-
-    // Освобождение от уплаты взносов
-    const selWaiver = ridersSelection.disability_waiver ?? {};
-    if (selWaiver.enabled) {
-      const r = this.calculateWaiverRider(x, n, t, gender, sumAssured, annualPremium, frequency);
-      results.disability_waiver = r;
-    }
-
-    // Критические заболевания
-    const selCI = ridersSelection.critical_illness ?? {};
-    if (selCI.enabled) {
-      const ciSum = selCI.sum ?? sumAssured;
-      const r = this.calculateCIRider(x, n, t, gender, ciSum, frequency, kMult, lAdd);
-      results.critical_illness = r;
     }
 
     return { riders: results, totalRiderPremium };

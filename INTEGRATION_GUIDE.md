@@ -82,15 +82,12 @@ npm run preview
   kMult?: number,                      // по умолчанию 1.0
   lAdd?: number,                       // по умолчанию 0.0
 
-  // Доп. покрытия:
+  // Доп. покрытия (для Gold в этой версии доступны только эти):
   riders?: {
     accidental_death?: { enabled: boolean, sum?: number },
     disability_accident_lumpsum?: { enabled: boolean, sum?: number },
     trauma?: { enabled: boolean, sum?: number, multiplier?: number },
-    temporary_disability?: { enabled: boolean, sum?: number },
-    hospitalization?: { enabled: boolean, sum?: number },
-    disability_waiver?: { enabled: boolean },
-    critical_illness?: { enabled: boolean, sum?: number }
+    hospitalization?: { enabled: boolean, sum?: number }
   }
 }
 ```
@@ -105,6 +102,13 @@ npm run preview
 Из этого следует фактический максимум возраста на входе:
 - `age <= 70 - term`
 - при `term >= 15` фактически `age <= 55`
+
+Ограничение покрытий для текущего калькулятора Gold:
+- Основное покрытие
+- Смерть от НС
+- Инвалидность I–II гр. в результате НС
+- Телесные травмы от НС
+- Госпитализация от НС
 
 ---
 
