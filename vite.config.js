@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
+  base: '/calc-gold-vue/',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -26,7 +27,7 @@ export default defineConfig({
     //   name: 'ProLifeGoldCalc',
     //   fileName: 'pro-life-gold-calc',
     // },
-    outDir: 'dist',
+    outDir: 'docs',
     sourcemap: false,
   },
 });
