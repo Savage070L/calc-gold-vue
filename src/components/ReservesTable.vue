@@ -77,7 +77,7 @@ const TIP = {
 
 const props = defineProps({ result: { type: Object, default: null } });
 
-const showTable = ref(true);
+const showTable = ref(window.innerWidth > 720);
 
 const tableRows = computed(() => props.result?.reserves ?? []);
 
@@ -143,9 +143,9 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
   font-family: 'SF Mono', 'Menlo', monospace;
 }
 
-/* Blue header */
+/* Header */
 .data-table thead tr {
-  background: linear-gradient(135deg, #1565C0, #1976D2);
+  background: linear-gradient(135deg, #3E6487, #2D5171);
 }
 .data-table th {
   color: white;
@@ -160,11 +160,14 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
 
 /* Rows */
 .data-table tbody tr {
-  border-bottom: 1px solid rgba(25, 118, 210, 0.12);
+  border-bottom: 1px solid rgba(62, 100, 135, 0.1);
   transition: background 0.13s ease;
 }
-.data-table tbody tr.even td {
-  background: rgba(25, 118, 210, 0.04);
+.data-table tbody tr:nth-child(odd) td {
+  background: rgba(124, 186, 66, 0.06);
+}
+.data-table tbody tr:nth-child(even) td {
+  background: rgba(62, 100, 135, 0.06);
 }
 .data-table tbody tr:hover td {
   background: var(--primary-pale, #E3F2FD);
@@ -230,24 +233,33 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
 }
 
 @media (max-width: 720px) {
+  .data-table { min-width: 0; }
+
   .toggle-btn {
     padding: 12px;
     font-size: 14px;
   }
 
+  .th-year   { width: 3%; }
+  .th-date   { width: 28%; }
+  .th-age    { width: 12%; }
+  .th-surrender { width: 57%; }
+
   .data-table th {
-    font-size: 12px;
-    padding: 10px 8px;
+    font-size: 10px;
+    padding: 8px 4px;
   }
 
   .data-table td {
-    font-size: 14px;
-    padding: 10px 8px;
+    font-size: 12px;
+    padding: 8px 4px;
   }
 
-  .col-year,
+  .col-year {
+    font-size: 13px;
+  }
   .col-surrender {
-    font-size: 16px;
+    font-size: 13px;
   }
 }
 </style>

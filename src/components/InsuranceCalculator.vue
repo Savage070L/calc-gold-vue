@@ -14,11 +14,12 @@
 
       <!-- Riders Card -->
       <div class="riders-card">
-        <div class="riders-card-header">
+        <div class="riders-card-header riders-toggle" :class="{ expanded: showRiders }" @click="showRiders = !showRiders">
           <span class="rc-icon">🛡️</span>
           <span>ДОПОЛНИТЕЛЬНЫЕ ПОКРЫТИЯ</span>
+          <span class="riders-arrow">{{ showRiders ? '▲' : '▼' }}</span>
         </div>
-        <RidersSection v-model="formData.riders" />
+        <RidersSection v-show="showRiders" v-model="formData.riders" />
       </div>
 
     </div>
@@ -60,11 +61,13 @@ import ReservesTable from './ReservesTable.vue';
 const { result, loading, errors, calculate, reset } = useInsuranceCalc();
 const { usdRate, currencyMode } = useCurrencyRate();
 
+const showRiders = ref(false);
+
 const formData = ref({
   dob: '',
-  gender: 'male',
+  gender: '',
   term: 20,
-  frequency: 'annual',
+  frequency: '',
   deathBenefitType: 'full_sum_assured',
   mode: 'premium_to_sa',
   sumAssured: 10_000_000,
@@ -72,7 +75,7 @@ const formData = ref({
   enableAnnuity: false,
   annuityFrequency: 'annual',
   annuityTerm: 10,
-  guaranteedPeriod: 0,
+  guaranteedPeriod: 10,
   riders: {
     accidental_death:            { enabled: false },
     disability_accident_lumpsum: { enabled: false },
@@ -98,6 +101,11 @@ const isFormComplete = computed(() => {
   return true;
 });
 
+// Гарантированный период всегда следует за сроком выплат
+watch(() => formData.value.annuityTerm, (newTerm) => {
+  formData.value.guaranteedPeriod = newTerm;
+});
+
 // Auto-calculate whenever form data changes (debounced 350ms)
 let calcTimer = null;
 watch(formData, () => {
@@ -116,7 +124,7 @@ watch(formData, () => {
 /* ── Page grid ─────────────────────────────── */
 .insurance-calculator {
   display: grid;
-  grid-template-columns: minmax(620px, 820px) minmax(560px, 1fr);
+  grid-template-columns: minmax(520px, 700px) minmax(560px, 1fr);
   gap: 16px;
   padding: 12px;
   max-width: 1880px;
@@ -170,25 +178,33 @@ watch(formData, () => {
 
 .riders-card-header {
   display: flex; align-items: center; gap: 10px;
-  margin-bottom: 8px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(66,165,245,0.15);
+  margin-bottom: 0;
+  padding-bottom: 0;
   font-size: 18px; font-weight: 800;
   text-transform: uppercase; letter-spacing: 1px;
   color: #E8F4FD;
 }
+.riders-card-header.expanded {
+  margin-bottom: 8px;
+  padding-bottom: 10px;
+}
 .rc-icon { font-size: 22px; }
+.riders-toggle { cursor: pointer; user-select: none; }
+.riders-arrow { margin-left: auto; font-size: 13px; opacity: 0.5; }
 
 /* ── Right column ──────────────────────────── */
 .right-column {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── Results section ───────────────────────── */
 .results-section {
   display: flex; flex-direction: column; gap: 16px;
+  min-width: 0; max-width: 100%;
 }
 
 /* ── Form errors ───────────────────────────── */
@@ -237,7 +253,7 @@ watch(formData, () => {
 /* ── Responsive ────────────────────────────── */
 @media (max-width: 1120px) {
   .insurance-calculator {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding: 14px;
     gap: 14px;
   }
@@ -245,8 +261,15 @@ watch(formData, () => {
 
 @media (max-width: 720px) {
   .insurance-calculator {
-    padding: 10px;
+    padding: 6px;
     gap: 10px;
+    max-width: 100%;
+    width: 100%;
+  }
+  .left-column,
+  .right-column {
+    max-width: 100%;
+    min-width: 0;
   }
 
   .form-card,

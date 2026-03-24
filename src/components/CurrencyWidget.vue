@@ -1,48 +1,26 @@
 <template>
-  <div class="currency-widget" :class="{ 'cw--manual': isManual }">
-
-    <!-- Chip: icon + currency name -->
-    <div class="cw-chip">
-      <span class="cw-chip-icon">💵</span>
-      <span class="cw-chip-label">Доллар США</span>
-    </div>
-
-    <!-- Editable rate -->
-    <div class="cw-rate-wrap">
-      <input
-        ref="inputRef"
-        class="cw-input"
-        type="text"
-        inputmode="decimal"
-        :value="inputVal"
-        :placeholder="isLoading ? '…' : '—'"
-        :disabled="isLoading"
-        autocomplete="off"
-        spellcheck="false"
-        title="Введите курс вручную"
-        @input="onInput"
-        @focus="onFocus"
-        @blur="onBlur"
-        @keydown.enter.prevent="($event.target).blur()"
-      />
-      <span class="cw-unit">₸</span>
-    </div>
-
-    <!-- Date + source label -->
-    <span class="cw-meta" v-if="displayDate">{{ displayDate }} (НБРК)</span>
-    <span class="cw-meta cw-meta--manual" v-else-if="isManual">вручную</span>
-
-    <!-- Refresh button -->
-    <button
-      class="cw-refresh"
-      type="button"
+  <div class="cw-wrap" :class="{ 'cw--manual': isManual }">
+    <input
+      ref="inputRef"
+      class="cw-input"
+      type="text"
+      inputmode="decimal"
+      :value="inputVal"
+      :placeholder="isLoading ? '…' : '—'"
       :disabled="isLoading"
-      :title="isManual ? 'Сбросить к курсу НБРК' : 'Обновить курс НБРК'"
-      @click="fetchRate"
-    >
-      <span :class="{ 'cw-spin': isLoading }">↻</span>
-    </button>
-
+      autocomplete="off"
+      spellcheck="false"
+      title="Введите курс вручную"
+      @input="onInput"
+      @focus="onFocus"
+      @blur="onBlur"
+      @keydown.enter.prevent="($event.target).blur()"
+    />
+    <span class="cw-suffix">
+      <span class="cw-suffix-symbol">₸</span>
+      <span class="cw-suffix-meta" v-if="!isManual && displayDate">НБРК {{ displayDate }}</span>
+      <span class="cw-suffix-meta cw-suffix-meta--manual" v-else-if="isManual">свой</span>
+    </span>
   </div>
 </template>
 
@@ -72,6 +50,8 @@ const displayDate = computed(() => {
   return fetchDate.value;
 });
 
+defineExpose({ displayDate, isManual, fetchRate, isLoading });
+
 // ── Input handlers ────────────────────────
 function onFocus(e) {
   e.target.select();
@@ -97,43 +77,28 @@ function onInput(e) {
   }
 }
 
-// ── Fetch from NBRK ───────────────────────
+// ── Fetch rate from local JSON (updated by GitHub Actions) ──
 async function fetchRate() {
   if (isLoading.value) return;
   isLoading.value = true;
   try {
-    const dateStr = todayStr();
-    const base    = import.meta.env.DEV ? '/api/nbrk' : 'https://nationalbank.kz';
-    const url     = `${base}/rss/get_rates.cfm?fdate=${dateStr}`;
-    const res     = await fetch(url, { signal: AbortSignal.timeout(9000) });
+    const base = import.meta.env.BASE_URL || '/';
+    const res  = await fetch(`${base}usd-rate.json?t=${Date.now()}`, { signal: AbortSignal.timeout(9000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    applyParsed(await res.text());
+    const data = await res.json();
+    if (data.rate && data.rate > 0) {
+      nbrkRate.value  = data.rate;
+      usdRate.value   = data.rate;
+      inputVal.value  = data.rate.toFixed(2);
+      fetchDate.value = data.date || '';
+      isManual.value  = false;
+      cacheData(data.rate);
+    }
   } catch (err) {
     console.warn('[CurrencyWidget] fetch error:', err.message);
     loadFromCache();
   } finally {
     isLoading.value = false;
-  }
-}
-
-function applyParsed(xml) {
-  const parser = new DOMParser();
-  const doc    = parser.parseFromString(xml, 'text/xml');
-  const dateEl = doc.querySelector('date');
-  if (dateEl) fetchDate.value = dateEl.textContent.trim();
-  for (const item of doc.querySelectorAll('item')) {
-    if (item.querySelector('title')?.textContent?.trim() === 'USD') {
-      const rateStr = item.querySelector('description')?.textContent?.trim() ?? '';
-      const num = parseFloat(rateStr);
-      if (!isNaN(num) && num > 0) {
-        nbrkRate.value = num;
-        usdRate.value  = num;
-        inputVal.value = num.toFixed(2);
-        isManual.value = false;
-        cacheData(num);
-      }
-      break;
-    }
   }
 }
 
@@ -158,139 +123,92 @@ function loadFromCache() {
   } catch (_) {}
 }
 
-function todayStr() {
-  const d = new Date();
-  return [
-    String(d.getDate()).padStart(2, '0'),
-    String(d.getMonth() + 1).padStart(2, '0'),
-    d.getFullYear(),
-  ].join('.');
-}
-
 onMounted(fetchRate);
 </script>
 
 <style scoped>
-/* ── Widget container ─────────────────── */
-.currency-widget {
+/* ── Wrapper — flex row, styled like .neu-input ── */
+.cw-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  gap: 3px;
+  padding: 10px 10px 10px 13px;
   border: 1px solid rgba(66, 165, 245, 0.18);
-  border-radius: 12px;
-  padding: 9px 14px;
-  width: 100%;
-  min-width: 0;
-  transition: border-color 0.2s;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15);
+  transition: border-color 0.2s ease;
+  height: 40px;
+  box-sizing: border-box;
 }
-.currency-widget:hover {
-  border-color: rgba(66, 165, 245, 0.32);
+.cw-wrap:focus-within {
+  border-color: #42A5F5;
+  box-shadow: 0 1px 4px rgba(66, 165, 245, 0.18);
 }
 .cw--manual {
   border-color: rgba(255, 183, 77, 0.35);
 }
 
-/* ── Chip: 💵 Доллар США ─────────────── */
-.cw-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(66, 165, 245, 0.14);
-  border: 1px solid rgba(66, 165, 245, 0.28);
-  border-radius: 8px;
-  padding: 5px 11px;
-  flex-shrink: 0;
-}
-.cw-chip-icon { font-size: 15px; line-height: 1; }
-.cw-chip-label {
-  font-size: 12px;
-  font-weight: 800;
-  color: #90CAF9;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-
-/* ── Rate input ──────────────────────── */
-.cw-rate-wrap {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
+/* ── Input — bare, no border ── */
 .cw-input {
-  background: transparent;
+  flex: 0 0 auto;
+  width: 64px;
+  padding: 0;
   border: none;
-  border-bottom: 1.5px dashed rgba(144, 202, 249, 0.4);
-  border-radius: 3px 3px 0 0;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 700;
   color: #fff;
-  font-size: 20px;
-  font-weight: 800;
-  font-family: 'SF Mono', 'Menlo', monospace;
-  letter-spacing: 0.02em;
-  width: 84px;
   outline: none;
-  padding: 1px 4px 2px;
-  text-align: right;
-  transition: border-color 0.18s, background 0.18s;
-  cursor: text;
-}
-.cw-input:focus {
-  border-bottom-color: #42A5F5;
-  border-bottom-style: solid;
-  background: rgba(66, 165, 245, 0.08);
 }
 .cw-input:disabled {
   color: rgba(255,255,255,0.3);
   cursor: not-allowed;
 }
 .cw-input::placeholder { color: rgba(255,255,255,0.25); }
-.cw--manual .cw-input {
-  border-bottom-color: rgba(255, 183, 77, 0.5);
-}
 
-.cw-unit {
-  font-size: 14px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.55);
+/* ── ₸ suffix + meta ── */
+.cw-suffix {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
 }
-
-/* ── Date / source ────────────────────── */
-.cw-meta {
-  font-size: 12px;
+.cw-suffix-symbol {
+  font-size: 14px;
+  font-weight: 600;
+  color: #E7F4FD;
+}
+.cw-suffix-meta {
+  font-size: 8px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.3);
   white-space: nowrap;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
+  letter-spacing: 0.02em;
 }
-.cw-meta--manual {
-  color: rgba(255, 183, 77, 0.6);
+.cw-suffix-meta--manual {
+  color: rgba(255, 183, 77, 0.55);
 }
 
-/* ── Refresh button ───────────────────── */
+/* ── Refresh button ── */
 .cw-refresh {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: rgba(66, 165, 245, 0.1);
-  border: 1px solid rgba(66, 165, 245, 0.28);
-  border-radius: 8px;
-  color: rgba(144, 202, 249, 0.75);
-  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(144, 202, 249, 0.6);
+  font-size: 14px;
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.18s;
 }
 .cw-refresh:hover:not(:disabled) {
-  background: rgba(66, 165, 245, 0.22);
-  border-color: rgba(66, 165, 245, 0.5);
+  background: rgba(66, 165, 245, 0.15);
   color: #90CAF9;
 }
 .cw-refresh:disabled {
@@ -298,16 +216,13 @@ onMounted(fetchRate);
   cursor: not-allowed;
 }
 .cw--manual .cw-refresh {
-  border-color: rgba(255, 183, 77, 0.35);
   color: rgba(255, 183, 77, 0.7);
-  background: rgba(255, 183, 77, 0.08);
 }
 .cw--manual .cw-refresh:hover:not(:disabled) {
-  background: rgba(255, 183, 77, 0.18);
-  border-color: rgba(255, 183, 77, 0.6);
+  background: rgba(255, 183, 77, 0.15);
 }
 
-/* ── Spin animation ───────────────────── */
+/* ── Spin animation ── */
 .cw-spin {
   display: inline-block;
   animation: cwSpin 0.75s linear infinite;
@@ -315,33 +230,5 @@ onMounted(fetchRate);
 @keyframes cwSpin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
-}
-
-@media (max-width: 720px) {
-  .currency-widget {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .cw-chip {
-    order: 1;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .cw-rate-wrap {
-    order: 2;
-  }
-
-  .cw-meta {
-    order: 3;
-    white-space: normal;
-  }
-
-  .cw-refresh {
-    order: 4;
-    margin-left: auto;
-  }
 }
 </style>

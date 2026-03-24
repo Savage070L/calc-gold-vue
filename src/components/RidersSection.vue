@@ -2,17 +2,26 @@
   <div class="riders-section">
     <div class="rider-group-label">СМЕРТЬ И ИНВАЛИДНОСТЬ</div>
     <div class="rider-check-row">
-      <input type="checkbox" v-model="local.accidental_death.enabled" />
+      <label class="rider-chk-wrap">
+        <input type="checkbox" v-model="local.accidental_death.enabled" class="rider-chk" />
+        <span class="rider-chk-box"></span>
+      </label>
       <span class="rider-name">Смерть в результате НС <InfoTooltip v-bind="TIP.accidental_death" /></span>
     </div>
     <div class="rider-check-row">
-      <input type="checkbox" v-model="local.disability_accident_lumpsum.enabled" />
+      <label class="rider-chk-wrap">
+        <input type="checkbox" v-model="local.disability_accident_lumpsum.enabled" class="rider-chk" />
+        <span class="rider-chk-box"></span>
+      </label>
       <span class="rider-name">Полная выплата при инвалидности (I, II группы) в результате НС <InfoTooltip v-bind="TIP.disability" /></span>
     </div>
 
     <div class="rider-group-label">ТРАВМЫ И ГОСПИТАЛИЗАЦИЯ</div>
     <div class="rider-check-row with-select">
-      <input type="checkbox" v-model="local.trauma.enabled" />
+      <label class="rider-chk-wrap">
+        <input type="checkbox" v-model="local.trauma.enabled" class="rider-chk" />
+        <span class="rider-chk-box"></span>
+      </label>
       <div class="rider-row-content">
         <span class="rider-name">
           Телесные травмы в результате НС
@@ -29,7 +38,10 @@
     </div>
 
     <div class="rider-check-row with-select">
-      <input type="checkbox" v-model="local.hospitalization.enabled" />
+      <label class="rider-chk-wrap">
+        <input type="checkbox" v-model="local.hospitalization.enabled" class="rider-chk" />
+        <span class="rider-chk-box"></span>
+      </label>
       <div class="rider-row-content">
         <span class="rider-name">
           Госпитализация в результате НС
@@ -88,7 +100,7 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
 .rider-group-label {
   font-size: 15px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.8px;
-  color: var(--accent, #42A5F5);
+  color: var(--accent, #47903C);
   margin: 10px 0 5px;
   padding-bottom: 5px;
   border-bottom: 1px solid var(--border-color, rgba(66,165,245,0.2));
@@ -98,13 +110,32 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
   display: grid; grid-template-columns: 22px 1fr;
   gap: 12px; align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border-color, rgba(66,165,245,0.1));
+  min-height: 52px;
 }
 .rider-check-row.with-select { align-items: center; }
 
-.rider-check-row input[type="checkbox"] {
-  width: 20px; height: 20px;
-  accent-color: var(--accent, #42A5F5); cursor: pointer;
+.rider-chk-wrap {
+  position: relative; display: inline-flex; align-items: center; cursor: pointer; flex-shrink: 0;
+}
+.rider-chk {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.rider-chk-box {
+  display: block; width: 20px; height: 20px;
+  border-radius: 5px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  transition: all 0.2s ease;
+  position: relative;
+}
+.rider-chk:checked ~ .rider-chk-box {
+  background: linear-gradient(135deg, #BBD034, #47903C);
+}
+.rider-chk:checked ~ .rider-chk-box::after {
+  content: '✓';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px; color: white; font-weight: 800;
 }
 
 .rider-name {
@@ -135,7 +166,7 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
   font-family: 'SF Mono', 'Menlo', monospace; font-weight: 600;
   cursor: pointer;
 }
-.rider-row-content select:focus { border-color: var(--accent, #42A5F5); }
+.rider-row-content select:focus { border-color: var(--accent, #47903C); }
 
 /* Info button override for dark background */
 .rider-name :deep(.info-btn) {
@@ -149,10 +180,12 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
   color: #1565C0;
 }
 .rider-legend {
-  margin-top: 10px;
-  font-size: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color, rgba(66,165,245,0.2));
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-light, #7FB3D3);
-  opacity: 0.9;
 }
 
 @media (max-width: 720px) {

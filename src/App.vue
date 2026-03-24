@@ -1,20 +1,5 @@
 <template>
   <div id="app">
-    <header class="app-header">
-      <div class="header-left">
-        <div class="logo-pill">
-          <span class="logo-icon">🛡</span>
-          <span class="logo-text">Pro Life</span>
-        </div>
-      </div>
-      <div class="header-center">
-        <h1 class="app-title">РАСЧЁТ СТРАХОВОЙ ПРЕМИИ</h1>
-      </div>
-      <div class="header-right">
-        <span class="header-badge">НСЖ</span>
-      </div>
-    </header>
-
     <main class="app-main">
       <InsuranceCalculator />
     </main>
@@ -69,6 +54,11 @@ body {
   color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 /* ── Global range slider ─── */
@@ -170,5 +160,14 @@ input[type="range"]::-moz-range-thumb {
   .app-title { font-size: 14px; }
   .header-center { order: 3; flex: 100%; }
   .logo-text { font-size: 13px; }
+}
+
+@media (max-width: 860px) {
+  :root {
+    --shadow-out:    2px 2px 8px rgba(150,175,210,0.25), -2px -2px 6px rgba(255,255,255,0.6);
+    --shadow-out-sm: 1px 1px 4px rgba(150,175,210,0.2), -1px -1px 4px rgba(255,255,255,0.5);
+    --shadow-btn:    2px 2px 6px rgba(150,175,210,0.25), -2px -2px 6px rgba(255,255,255,0.6);
+    --radius: 14px;
+  }
 }
 </style>

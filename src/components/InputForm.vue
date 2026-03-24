@@ -5,7 +5,7 @@
     <div class="form-grid">
       <!-- Дата рождения | Пол -->
       <div class="form-group">
-        <label for="dob">Дата рождения <span class="required-star">*</span></label>
+        <label for="dob">Дата рождения</label>
         <input
           ref="dobInput"
           id="dob"
@@ -20,7 +20,7 @@
       </div>
 
       <div class="form-group">
-        <label>Пол <span class="required-star">*</span></label>
+        <label>Пол</label>
         <div class="radio-group">
           <label class="radio-pill">
             <input type="radio" v-model="local.gender" value="male" />
@@ -36,19 +36,8 @@
       <!-- Срок страхования — слайдер, на всю ширину -->
       <div class="form-group term-group full-width">
         <div class="term-header">
-          <label class="label-row">Срок страхования <span class="required-star">*</span> <InfoTooltip v-bind="TIP.term" /></label>
-          <div class="term-input-wrap">
-            <input
-              id="termInput"
-              type="number"
-              v-model.number="local.term"
-              :min="minTerm"
-              :max="maxTermAllowed"
-              class="term-number-input"
-              @blur="normalizeTermInput"
-            />
-            <span class="term-input-suffix">лет</span>
-          </div>
+          <label class="label-row">Срок страхования <InfoTooltip v-bind="TIP.term" /></label>
+          <span class="term-badge">{{ local.term }} лет</span>
         </div>
         <input
           type="range"
@@ -94,58 +83,72 @@
         </div>
       </div>
 
-      <!-- Виджет курса доллара -->
-      <div class="form-group full-width">
-        <CurrencyWidget />
-      </div>
-
-      <!-- Периодичность | Страховая сумма / Взнос — в одну строку -->
-      <div class="form-group">
-        <label for="frequency" class="label-row">Периодичность взносов <InfoTooltip v-bind="TIP.frequency" /></label>
-        <select id="frequency" v-model="local.frequency" class="neu-input">
-          <option value="annual">Раз в год</option>
-          <option value="semiannual">Раз в полгода</option>
-          <option value="quarterly">Раз в квартал</option>
-          <option value="monthly">Ежемесячно</option>
-          <option value="single">Единовременный</option>
-        </select>
-      </div>
-
-      <div class="form-group" v-if="local.mode === 'sa_to_premium'">
-        <label for="sumAssured" class="label-row">
-          Страховая сумма ({{ isUsdInput ? 'USD' : 'KZT' }}) <InfoTooltip v-bind="TIP.sumAssured" />
-        </label>
-        <div class="input-wrap">
-          <input
-            ref="sumAssuredInput"
-            id="sumAssured"
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            :value="displaySumAssured"
-            @input="onSumInput"
-            class="neu-input"
-          />
-          <span class="input-suffix">{{ isUsdInput ? '$' : '₸' }}</span>
+      <!-- Периодичность | Курс доллара | Сумма — в одну строку -->
+      <div class="three-col-row full-width">
+        <div class="form-group three-col-item three-col-item--wide">
+          <label for="frequency" class="label-row">Периодичность взносов <InfoTooltip v-bind="TIP.frequency" /></label>
+          <select id="frequency" v-model="local.frequency" class="neu-input" :class="{ 'placeholder-shown': !local.frequency }">
+            <option value="" disabled>Выберите частоту пополнения</option>
+            <option value="annual">Раз в год</option>
+            <option value="semiannual">Раз в полгода</option>
+            <option value="quarterly">Раз в квартал</option>
+            <option value="monthly">Ежемесячно</option>
+            <option value="single">Единовременный</option>
+          </select>
         </div>
-      </div>
 
-      <div class="form-group" v-if="local.mode === 'premium_to_sa'">
-        <label for="premium" class="label-row">
-          Сумма взноса ({{ isUsdInput ? 'USD' : 'KZT' }}) <InfoTooltip v-bind="TIP.premium" />
-        </label>
-        <div class="input-wrap">
-          <input
-            ref="premiumInput"
-            id="premium"
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            :value="displayPremium"
-            @input="onPremInput"
-            class="neu-input"
-          />
-          <span class="input-suffix">{{ isUsdInput ? '$' : '₸' }}</span>
+        <div class="form-group three-col-item three-col-item--slim">
+          <label class="label-row">
+            Курс доллара
+            <button
+              class="cw-refresh-label"
+              type="button"
+              :disabled="cwRef?.isLoading"
+              :title="cwRef?.isManual ? 'Сбросить к курсу НБРК' : 'Обновить курс НБРК'"
+              @click="cwRef?.fetchRate()"
+            >
+              <span :class="{ 'cw-spin': cwRef?.isLoading }">↻</span>
+            </button>
+          </label>
+          <CurrencyWidget ref="cwRef" />
+        </div>
+
+        <div class="form-group three-col-item three-col-item--narrow" v-if="local.mode === 'sa_to_premium'">
+          <label for="sumAssured" class="label-row">
+            Страховая сумма ({{ isUsdInput ? 'USD' : 'KZT' }}) <InfoTooltip v-bind="TIP.sumAssured" />
+          </label>
+          <div class="input-wrap">
+            <span class="input-suffix">{{ isUsdInput ? '$' : '₸' }}</span>
+            <input
+              ref="sumAssuredInput"
+              id="sumAssured"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              :value="displaySumAssured"
+              @input="onSumInput"
+              class="neu-input"
+            />
+          </div>
+        </div>
+
+        <div class="form-group three-col-item three-col-item--narrow" v-if="local.mode === 'premium_to_sa'">
+          <label for="premium" class="label-row">
+            Сумма взноса ({{ isUsdInput ? 'USD' : 'KZT' }}) <InfoTooltip v-bind="TIP.premium" />
+          </label>
+          <div class="input-wrap">
+            <span class="input-suffix">{{ isUsdInput ? '$' : '₸' }}</span>
+            <input
+              ref="premiumInput"
+              id="premium"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              :value="displayPremium"
+              @input="onPremInput"
+              class="neu-input"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -270,6 +273,7 @@ const local = ref({ ...props.modelValue });
 const dobInput       = ref(null);
 const sumAssuredInput = ref(null);
 const premiumInput   = ref(null);
+const cwRef          = ref(null);
 
 // ── Number formatting ─────────────────────────────────────
 // Integer formatter (whole tenge or whole dollars — no decimals)
@@ -413,12 +417,6 @@ watch([currencyMode, usdRate], ([newMode, newRate], [oldMode]) => {
   });
 });
 
-// Гарантированный период не может превышать срок выплат
-watch(() => local.value.annuityTerm, (newTerm) => {
-  if ((local.value.guaranteedPeriod || 0) > newTerm) {
-    local.value.guaranteedPeriod = newTerm;
-  }
-});
 
 watch(() => props.modelValue, (val) => {
   const prevDob = local.value.dob;
@@ -444,7 +442,7 @@ const termSliderStyle = computed(() => {
   const min = minTerm, max = maxTermAllowed.value, val = local.value.term;
   const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
   return {
-    background: `linear-gradient(to right, #1976D2 0%, #42A5F5 ${pct}%, rgba(255,255,255,0.12) ${pct}%, rgba(255,255,255,0.07) 100%)`,
+    background: `linear-gradient(to right, #47903C 0%, #BBD034 ${pct}%, rgba(255,255,255,0.12) ${pct}%, rgba(255,255,255,0.07) 100%)`,
   };
 });
 
@@ -452,7 +450,7 @@ const annuityTermSliderStyle = computed(() => {
   const min = 1, max = 50, val = local.value.annuityTerm || 1;
   const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
   return {
-    background: `linear-gradient(to right, #1976D2 0%, #42A5F5 ${pct}%, rgba(255,255,255,0.12) ${pct}%, rgba(255,255,255,0.07) 100%)`,
+    background: `linear-gradient(to right, #47903C 0%, #BBD034 ${pct}%, rgba(255,255,255,0.12) ${pct}%, rgba(255,255,255,0.07) 100%)`,
   };
 });
 
@@ -460,7 +458,7 @@ const guaranteedPeriodSliderStyle = computed(() => {
   const min = 0, max = local.value.annuityTerm || 1, val = local.value.guaranteedPeriod || 0;
   const pct = max > 0 ? (val / max) * 100 : 0;
   return {
-    background: `linear-gradient(to right, #1976D2 0%, #42A5F5 ${pct}%, rgba(255,255,255,0.12) ${pct}%, rgba(255,255,255,0.07) 100%)`,
+    background: `linear-gradient(to right, #47903C 0%, #BBD034 ${pct}%, rgba(255,255,255,0.12) ${pct}%, rgba(255,255,255,0.07) 100%)`,
   };
 });
 
@@ -499,6 +497,41 @@ function normalizeTermInput() {
 }
 .full-width { grid-column: 1 / -1; }
 
+.three-col-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+.three-col-row .label-row {
+  min-height: 30px;
+  display: flex;
+  align-items: flex-end;
+}
+.three-col-item {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+.three-col-item--wide {
+  flex: 1.07 1 160px;
+}
+.three-col-item--narrow {
+  flex: 1.05 1 170px;
+}
+.three-col-item--slim {
+  flex: 0.85 1 140px;
+}
+
+.cw-date-hint {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+  margin-left: 4px;
+}
+.cw-date-hint--manual {
+  color: rgba(255, 183, 77, 0.6);
+}
+
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label {
   font-size: 12px; font-weight: 600;
@@ -508,6 +541,16 @@ function normalizeTermInput() {
 .label-row {
   display: flex; align-items: center; gap: 5px;
 }
+
+.cw-refresh-label {
+  background: none; border: none; color: rgba(255,255,255,0.5);
+  cursor: pointer; font-size: 14px; padding: 0 2px;
+  transition: color 0.2s;
+}
+.cw-refresh-label:hover { color: #BBD034; }
+.cw-refresh-label:disabled { opacity: 0.3; cursor: not-allowed; }
+@keyframes cw-spin-anim { to { transform: rotate(360deg); } }
+.cw-spin { display: inline-block; animation: cw-spin-anim 0.8s linear infinite; }
 
 .required-star {
   color: #ff8a80;
@@ -519,20 +562,47 @@ function normalizeTermInput() {
   width: 100%; padding: 10px 13px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  font-size: 14px; font-weight: 600;
+  font-size: 12px; font-weight: 600;
   background: var(--surface);
   box-shadow: var(--shadow-in);
   color: var(--text-main);
   outline: none;
   transition: border-color 0.2s ease;
+  height: 40px;
+  box-sizing: border-box;
 }
 .neu-input:focus { border-color: var(--accent); box-shadow: var(--shadow-btn-press); }
+select#frequency.placeholder-shown { font-weight: 400; font-size: 12px; }
+select#frequency:not(.placeholder-shown) { font-weight: 600; font-size: 14px; }
+select#annuityFrequency { font-size: 14px; font-weight: 600; }
 
-.input-wrap { position: relative; }
-.input-wrap .neu-input { padding-right: 30px; }
+.input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-in);
+  transition: border-color 0.2s ease;
+  height: 40px;
+  box-sizing: border-box;
+}
+.input-wrap:focus-within { border-color: var(--accent); box-shadow: var(--shadow-btn-press); }
+.input-wrap .neu-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-size: 16px;
+  font-weight: 700;
+}
+.input-wrap .neu-input:focus { border: none; box-shadow: none; }
 .input-suffix {
-  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-  font-size: 15px; font-weight: 700; color: var(--accent); pointer-events: none;
+  font-size: 14px; font-weight: 600; color: #E7F4FD; flex-shrink: 0;
 }
 
 /* ── Radio pills ─────────────────────── */
@@ -543,7 +613,7 @@ function normalizeTermInput() {
 .radio-pill span {
   display: flex; align-items: center; justify-content: center;
   text-align: center; white-space: nowrap;
-  padding: 10px 12px; border-radius: 10px;
+  padding: 10px 14px; border-radius: 10px;
   cursor: pointer; font-size: 12px; font-weight: 600;
   background: var(--surface);
   box-shadow: var(--shadow-btn);
@@ -553,29 +623,31 @@ function normalizeTermInput() {
   height: 42px;
 }
 .radio-pill input:checked + span {
-  background: linear-gradient(135deg, var(--accent-hover, #42A5F5), var(--accent, #1976D2));
-  color: white; border-color: transparent;
-  box-shadow: 0 2px 8px rgba(25,118,210,0.4);
+  background: linear-gradient(135deg, #BBD034, #47903C);
+  color: white; border: none;
+  box-shadow: 0 2px 8px rgba(71,144,60,0.4);
 }
 .pill-faded span { opacity: 0.45; }
 
 /* ── Term slider ─────────────────────── */
-.term-header { display: flex; align-items: center; justify-content: space-between; }
+.term-header { display: flex; align-items: center; justify-content: space-between; padding-right: 4px; }
 .term-badge {
-  background: linear-gradient(135deg, var(--accent-hover, #42A5F5), var(--accent, #1976D2));
+  background: linear-gradient(135deg, #BBD034, #47903C);
   color: white; font-size: 14px; font-weight: 800;
   padding: 3px 14px; border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(25,118,210,0.4);
+  box-shadow: 0 2px 8px rgba(71,144,60,0.4);
+  margin-right: 2px;
 }
 .term-slider { margin-top: 10px; width: 100%; }
 .term-input-wrap {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: linear-gradient(135deg, var(--accent-hover, #42A5F5), var(--accent, #1976D2));
+  background: linear-gradient(135deg, #BBD034, #47903C);
   border-radius: 20px;
-  padding: 3px 8px;
-  box-shadow: 0 2px 8px rgba(25,118,210,0.4);
+  padding: 3px 10px;
+  box-shadow: 0 2px 8px rgba(71,144,60,0.4);
+  margin-right: 2px;
 }
 .term-number-input {
   width: 44px;
@@ -626,14 +698,13 @@ function normalizeTermInput() {
 .custom-chk {
   display: block; width: 18px; height: 18px;
   border-radius: 5px;
-  border: 2px solid rgba(66,165,245,0.4);
-  background: rgba(255,255,255,0.06);
+  border: none;
+  background: rgba(255,255,255,0.15);
   transition: all 0.2s ease;
   position: relative;
 }
 .annuity-chk:checked ~ .custom-chk {
-  background: linear-gradient(135deg, #42A5F5, #1976D2);
-  border-color: transparent;
+  background: linear-gradient(135deg, #BBD034, #47903C);
 }
 .annuity-chk:checked ~ .custom-chk::after {
   content: '✓';
@@ -673,15 +744,26 @@ function normalizeTermInput() {
 
   .radio-group,
   .mode-toggle {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .radio-pill span {
-    min-height: 42px;
+    min-height: 34px;
     height: auto;
-    white-space: normal;
-    line-height: 1.25;
-    padding: 10px;
+    white-space: nowrap;
+    line-height: 1.2;
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .radio-pill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .radio-pill span {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .annuity-toggle-label {
