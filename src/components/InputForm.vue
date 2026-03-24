@@ -53,36 +53,6 @@
         </span>
       </div>
 
-      <!-- Режим расчёта — на всю ширину, обе кнопки в одну строку -->
-      <div class="form-group full-width">
-        <label class="label-row">Режим расчёта <InfoTooltip v-bind="TIP.mode" /></label>
-        <div class="mode-toggle">
-          <label class="radio-pill">
-            <input type="radio" v-model="local.mode" value="premium_to_sa" />
-            <span>Взнос → Страховая сумма</span>
-          </label>
-          <label class="radio-pill">
-            <input type="radio" v-model="local.mode" value="sa_to_premium" />
-            <span>Страховая сумма → Взнос</span>
-          </label>
-        </div>
-      </div>
-
-      <!-- Валюта взносов -->
-      <div class="form-group full-width">
-        <label class="label-row">Валюта взносов и результатов</label>
-        <div class="mode-toggle">
-          <label class="radio-pill" :class="{ 'pill-faded': !usdRate }">
-            <input type="radio" v-model="currencyMode" value="USD" />
-            <span>$ Доллар (USD)</span>
-          </label>
-          <label class="radio-pill">
-            <input type="radio" v-model="currencyMode" value="KZT" />
-            <span>₸ Тенге (KZT)</span>
-          </label>
-        </div>
-      </div>
-
       <!-- Периодичность | Курс доллара | Сумма — в одну строку -->
       <div class="three-col-row full-width">
         <div class="form-group three-col-item three-col-item--wide">
@@ -149,6 +119,36 @@
               class="neu-input"
             />
           </div>
+        </div>
+      </div>
+
+      <!-- Режим расчёта — на всю ширину, обе кнопки в одну строку -->
+      <div class="form-group full-width">
+        <label class="label-row">Режим расчёта <InfoTooltip v-bind="TIP.mode" /></label>
+        <div class="mode-toggle">
+          <label class="radio-pill">
+            <input type="radio" v-model="local.mode" value="premium_to_sa" />
+            <span>Взнос → Страховая сумма</span>
+          </label>
+          <label class="radio-pill">
+            <input type="radio" v-model="local.mode" value="sa_to_premium" />
+            <span>Страховая сумма → Взнос</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Валюта взносов -->
+      <div class="form-group full-width">
+        <label class="label-row">Валюта взносов и результатов</label>
+        <div class="mode-toggle">
+          <label class="radio-pill" :class="{ 'pill-faded': !usdRate }">
+            <input type="radio" v-model="currencyMode" value="USD" />
+            <span>$ Доллар (USD)</span>
+          </label>
+          <label class="radio-pill">
+            <input type="radio" v-model="currencyMode" value="KZT" />
+            <span>₸ Тенге (KZT)</span>
+          </label>
         </div>
       </div>
     </div>
