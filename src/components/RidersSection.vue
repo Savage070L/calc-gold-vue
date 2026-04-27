@@ -1,22 +1,22 @@
 <template>
   <div class="riders-section">
-    <div class="rider-group-label">СМЕРТЬ И ИНВАЛИДНОСТЬ</div>
+    <div class="rider-group-label">{{ t('riders.groupDeath') }}</div>
     <div class="rider-check-row">
       <label class="rider-chk-wrap">
         <input type="checkbox" v-model="local.accidental_death.enabled" class="rider-chk" />
         <span class="rider-chk-box"></span>
       </label>
-      <span class="rider-name">Смерть в результате НС <InfoTooltip v-bind="TIP.accidental_death" /></span>
+      <span class="rider-name">{{ t('riders.accidentalDeath') }} <InfoTooltip v-bind="tip('accidentalDeath')" /></span>
     </div>
     <div class="rider-check-row">
       <label class="rider-chk-wrap">
         <input type="checkbox" v-model="local.disability_accident_lumpsum.enabled" class="rider-chk" />
         <span class="rider-chk-box"></span>
       </label>
-      <span class="rider-name">Полная выплата при инвалидности (I, II группы) в результате НС <InfoTooltip v-bind="TIP.disability" /></span>
+      <span class="rider-name">{{ t('riders.disability') }} <InfoTooltip v-bind="tip('disability')" /></span>
     </div>
 
-    <div class="rider-group-label">ТРАВМЫ И ГОСПИТАЛИЗАЦИЯ</div>
+    <div class="rider-group-label">{{ t('riders.groupTraumaHosp') }}</div>
     <div class="rider-check-row with-select">
       <label class="rider-chk-wrap">
         <input type="checkbox" v-model="local.trauma.enabled" class="rider-chk" />
@@ -24,9 +24,9 @@
       </label>
       <div class="rider-row-content">
         <span class="rider-name">
-          Телесные травмы в результате НС
-          <span class="rider-hint">(выберите сумму)</span>
-          <InfoTooltip v-bind="TIP.trauma" />
+          {{ t('riders.trauma') }}
+          <span class="rider-hint">{{ t('riders.chooseSum') }}</span>
+          <InfoTooltip v-bind="tip('trauma')" />
         </span>
         <select v-model.number="local.trauma.sum">
           <option :value="500000">500 000 ₸</option>
@@ -44,9 +44,9 @@
       </label>
       <div class="rider-row-content">
         <span class="rider-name">
-          Госпитализация в результате НС
-          <span class="rider-hint">(выберите сумму)</span>
-          <InfoTooltip v-bind="TIP.hospitalization" />
+          {{ t('riders.hospitalization') }}
+          <span class="rider-hint">{{ t('riders.chooseSum') }}</span>
+          <InfoTooltip v-bind="tip('hospitalization')" />
         </span>
         <select v-model.number="local.hospitalization.sum">
           <option :value="500000">500 000 ₸</option>
@@ -57,35 +57,19 @@
         </select>
       </div>
     </div>
-    <div class="rider-legend">НС — Несчастный случай</div>
+    <div class="rider-legend">{{ t('riders.legend') }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
 import InfoTooltip from './InfoTooltip.vue';
+import { useI18n } from '../i18n/index.js';
+
+const { t, tip } = useI18n();
 
 const props = defineProps({ modelValue: { type: Object, required: true } });
 const emit = defineEmits(['update:modelValue']);
-
-const TIP = {
-  accidental_death: {
-    title: 'Смерть от НС',
-    text: 'Дополнительная защита вашего накопительного плана на случай непредвиденных обстоятельств.<br><br>Если вследствие НС (ДТП, травма и т.п.) застрахованный уйдёт из жизни до окончания полиса — семья получит <b>вдвое больше</b>: основную страховую сумму плюс столько же дополнительно.<br><br>Это гарантирует, что ваш финансовый план будет выполнен для близких в полном объёме.',
-  },
-  disability: {
-    title: 'Инвалидность от НС',
-    text: 'Защита вашего дохода и накоплений при наступлении инвалидности I или II группы вследствие НС.<br><br>Единовременно выплачивается <b>100% страховой суммы</b> — это позволяет не прерывать финансовый план даже при значительном снижении трудоспособности.<br><br>Полис при этом продолжает действовать в полном объёме.',
-  },
-  trauma: {
-    title: 'Телесные травмы от НС',
-    text: 'Финансовая поддержка при лечении травм, полученных в результате НС: переломы, ожоги, вывихи, сотрясение мозга и другие повреждения.<br><br>Выплата рассчитывается по таблице в зависимости от характера травмы. Это позволяет <b>покрыть расходы на лечение, не затрагивая свои накопления</b>.<br><br>Чем выше выбранная страховая сумма — тем больше компенсация при каждой конкретной травме.',
-  },
-  hospitalization: {
-    title: 'Госпитализация от НС',
-    text: 'Компенсация расходов при экстренной госпитализации вследствие НС.<br><br>Покрывает:<br>• Платные медицинские услуги и лечение<br>• Потерю дохода в период нетрудоспособности<br>• Расходы на реабилитацию<br><br>Благодаря этому покрытию вы <b>не будете вынуждены тратить накопления</b> на непредвиденные медицинские расходы.',
-  },
-};
 
 const local = ref({
   accidental_death:            { enabled: false, ...props.modelValue.accidental_death },
@@ -148,7 +132,6 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
   white-space: nowrap;
 }
 
-/* Name (flex:1) fills space — select stays pinned right with no floating gap */
 .rider-row-content {
   display: flex; align-items: center;
   gap: 16px; flex-wrap: nowrap;
@@ -168,7 +151,6 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
 }
 .rider-row-content select:focus { border-color: var(--accent, #47903C); }
 
-/* Info button override for dark background */
 .rider-name :deep(.info-btn) {
   border-color: rgba(255,255,255,0.5);
   color: rgba(255,255,255,0.6);

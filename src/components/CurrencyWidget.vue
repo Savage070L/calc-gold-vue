@@ -18,8 +18,8 @@
     />
     <span class="cw-suffix">
       <span class="cw-suffix-symbol">₸</span>
-      <span class="cw-suffix-meta" v-if="!isManual && displayDate">НБРК {{ displayDate }}</span>
-      <span class="cw-suffix-meta cw-suffix-meta--manual" v-else-if="isManual">свой</span>
+      <span class="cw-suffix-meta" v-if="!isManual && displayDate" v-fit-text="{ min: 6, max: 9 }">{{ t('form.nbrk') }} {{ displayDate }}</span>
+      <span class="cw-suffix-meta cw-suffix-meta--manual" v-else-if="isManual">{{ t('form.manualRate') }}</span>
     </span>
   </div>
 </template>
@@ -27,7 +27,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useCurrencyRate } from '../composables/useCurrencyRate.js';
+import { useI18n } from '../i18n/index.js';
 
+const { t } = useI18n();
 const { usdRate } = useCurrencyRate();
 
 // ── State ─────────────────────────────────

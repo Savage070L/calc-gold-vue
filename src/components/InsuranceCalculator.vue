@@ -16,7 +16,7 @@
       <div class="riders-card">
         <div class="riders-card-header riders-toggle" :class="{ expanded: showRiders }" @click="showRiders = !showRiders">
           <span class="rc-icon">🛡️</span>
-          <span>ДОПОЛНИТЕЛЬНЫЕ ПОКРЫТИЯ</span>
+          <span>{{ t('ridersHeader') }}</span>
           <span class="riders-arrow">{{ showRiders ? '▲' : '▼' }}</span>
         </div>
         <RidersSection v-show="showRiders" v-model="formData.riders" />
@@ -30,7 +30,7 @@
       <!-- Loading state -->
       <div class="calc-loading" v-if="loading">
         <div class="loading-dots"><span></span><span></span><span></span></div>
-        <span>Рассчитываем…</span>
+        <span>{{ t('calculating') }}</span>
       </div>
 
       <!-- Results — shown when calculation is ready -->
@@ -42,7 +42,7 @@
       <!-- Placeholder — form not yet complete -->
       <div class="calc-placeholder" v-else>
         <div class="placeholder-icon">🧮</div>
-        <span>Заполните данные для расчёта</span>
+        <span>{{ t('fillToCalculate') }}</span>
       </div>
 
     </div>
@@ -50,13 +50,16 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useInsuranceCalc } from '../composables/useInsuranceCalc.js';
 import { useCurrencyRate } from '../composables/useCurrencyRate.js';
 import InputForm from './InputForm.vue';
 import RidersSection from './RidersSection.vue';
 import ResultsSummary from './ResultsSummary.vue';
 import ReservesTable from './ReservesTable.vue';
+import { useI18n } from '../i18n/index.js';
+
+const { t } = useI18n();
 
 const { result, loading, errors, calculate, reset } = useInsuranceCalc();
 const { usdRate, currencyMode } = useCurrencyRate();
@@ -118,6 +121,21 @@ watch(formData, () => {
     }
   }, 350);
 }, { deep: true });
+
+// On narrow screens (stacked layout), scroll to the results once they first
+// appear so the user instantly sees that the calculation is ready.
+let hasScrolledToResults = false;
+watch(result, (r, prev) => {
+  if (!r || prev || hasScrolledToResults) return;
+  if (typeof window === 'undefined' || window.innerWidth > 1120) return;
+  hasScrolledToResults = true;
+  nextTick(() => {
+    const el = document.querySelector('.result-section-header') || document.querySelector('.top-badges');
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 8;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  });
+});
 </script>
 
 <style scoped>

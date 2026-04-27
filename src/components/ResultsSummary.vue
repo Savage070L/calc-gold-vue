@@ -1,36 +1,42 @@
 <template>
   <div class="results-summary" v-if="result">
+    <div class="result-section-header" aria-hidden="true">
+      <span class="rsh-line"></span>
+      <span class="rsh-text">{{ t('results.sectionHeader') }}</span>
+      <span class="rsh-line"></span>
+    </div>
+
     <div class="top-badges" :class="{ 'has-annuity': result.annuityPayment > 0 }">
       <div class="summary-badge badge-sa">
-        <span class="badge-label">СТРАХОВАЯ СУММА <InfoTooltip v-bind="TIP.sumAssured" /></span>
-        <span class="badge-value" :style="badgeFontStyle(animated.sumAssured)">{{ fmtTopValue(animated.sumAssured) }}</span>
+        <span class="badge-label" v-fit-text="{ min: 9, max: 15 }">{{ t('results.sumAssured') }} <InfoTooltip v-bind="tip('sumAssured')" /></span>
+        <span class="badge-value" v-fit-text="badgeFitOpts">{{ fmtTopValue(animated.sumAssured) }}</span>
       </div>
 
       <div class="summary-badge badge-annuity" v-if="result.annuityPayment > 0">
-        <span class="badge-label">АННУИТЕТНЫЕ ВЫПЛАТЫ <InfoTooltip v-bind="TIP.annuityTop" /></span>
-        <span class="badge-value" :style="badgeFontStyle(animated.annuityPayment)">{{ fmtTopValue(animated.annuityPayment) }}</span>
+        <span class="badge-label" v-fit-text="{ min: 9, max: 15 }">{{ t('results.annuity') }} <InfoTooltip v-bind="tip('annuityTop')" /></span>
+        <span class="badge-value" v-fit-text="badgeFitOpts">{{ fmtTopValue(animated.annuityPayment) }}</span>
       </div>
 
       <div class="summary-badge badge-premium">
-        <span class="badge-label">ИТОГО ПРЕМИЯ <InfoTooltip v-bind="TIP.totalPremium" /></span>
-        <span class="badge-value" :style="badgeFontStyle(animated.totalPremium)">{{ fmtTopValue(animated.totalPremium) }}</span>
+        <span class="badge-label" v-fit-text="{ min: 9, max: 15 }">{{ t('results.totalPremium') }} <InfoTooltip v-bind="tip('totalPremium')" /></span>
+        <span class="badge-value" v-fit-text="badgeFitOpts">{{ fmtTopValue(animated.totalPremium) }}</span>
       </div>
     </div>
 
     <div class="total-block">
       <h3 class="detail-toggle" @click="showDetails = !showDetails">
-        <span class="icon">💰</span> Детализация по покрытиям <InfoTooltip v-bind="TIP.details" />
+        <span class="icon">💰</span> {{ t('results.detailsTitle') }} <InfoTooltip v-bind="tip('details')" />
         <span class="detail-arrow">{{ showDetails ? '▲' : '▼' }}</span>
       </h3>
       <div v-show="showDetails" class="detail-body">
         <div class="total-header-row">
-          <span class="hcol-label"><span class="hcol-full">Покрытие</span><span class="hcol-short">Покрытие</span> <InfoTooltip v-bind="TIP.colCoverage" /></span>
-          <span class="hcol-sum"><span class="hcol-full">Страховая сумма</span><span class="hcol-short">Сумма</span> <InfoTooltip v-bind="TIP.colSum" /></span>
-          <span class="hcol-prem"><span class="hcol-full">Премия</span><span class="hcol-short">Премия</span> <InfoTooltip v-bind="TIP.colPremium" /></span>
+          <span class="hcol-label"><span class="hcol-full">{{ t('results.colCoverage') }}</span><span class="hcol-short">{{ t('results.colCoverageShort') }}</span> <InfoTooltip v-bind="tip('colCoverage')" /></span>
+          <span class="hcol-sum"><span class="hcol-full">{{ t('results.colSum') }}</span><span class="hcol-short">{{ t('results.colSumShort') }}</span> <InfoTooltip v-bind="tip('colSum')" /></span>
+          <span class="hcol-prem"><span class="hcol-full">{{ t('results.colPremium') }}</span><span class="hcol-short">{{ t('results.colPremiumShort') }}</span> <InfoTooltip v-bind="tip('colPremium')" /></span>
         </div>
 
         <div class="total-row">
-          <span class="total-label">Основное покрытие</span>
+          <span class="total-label">{{ t('results.baseCoverage') }}</span>
           <span class="total-sum">{{ fmtP(animated.sumAssured) }}</span>
           <span class="total-value">{{ fmtP(animated.grossPremium) }}</span>
         </div>
@@ -43,15 +49,15 @@
 
         <div v-if="result.annuityPayment > 0" class="detail-summary-card annuity-card">
           <div class="dsc-left">
-            <span class="dsc-title">Аннуитетная выплата</span>
-            <span class="dsc-sub">в течении {{ annuityTermText }} с гарант. периодом {{ guaranteedPeriodText }}, периодичностью "{{ annuityFreqLabel }}"</span>
+            <span class="dsc-title">{{ t('results.annuityCard') }}</span>
+            <span class="dsc-sub">{{ t('results.annuityCardSub', { term: annuityTermText, gp: guaranteedPeriodText, freq: annuityFreqLabel }) }}</span>
           </div>
           <span class="dsc-value">{{ fmtP(animated.annuityPayment) }}</span>
         </div>
 
         <div class="detail-summary-card sa-card">
           <div class="dsc-left">
-            <span class="dsc-title">Страховая сумма</span>
+            <span class="dsc-title">{{ t('results.saCard') }}</span>
             <span class="dsc-sub">{{ saDescription }}</span>
           </div>
           <span class="dsc-value">{{ fmtP(animated.sumAssured) }}</span>
@@ -59,8 +65,8 @@
 
         <div class="detail-summary-card premium-card">
           <div class="dsc-left">
-            <span class="dsc-title">Итого премия</span>
-            <span class="dsc-sub">в течении {{ termText }} с периодичностью "{{ premiumFreqLabel }}"</span>
+            <span class="dsc-title">{{ t('results.premiumCard') }}</span>
+            <span class="dsc-sub">{{ t('results.premiumCardSub', { term: termText, freq: premiumFreqLabel }) }}</span>
           </div>
           <span class="dsc-value">{{ fmtP(animated.totalPremium) }}</span>
         </div>
@@ -74,6 +80,9 @@ import { ref, computed, reactive, watch, onMounted } from 'vue';
 import { formatMoney } from '../composables/useInsuranceCalc.js';
 import { useCurrencyRate } from '../composables/useCurrencyRate.js';
 import InfoTooltip from './InfoTooltip.vue';
+import { useI18n } from '../i18n/index.js';
+
+const { t, tip, pluralYears, dict } = useI18n();
 
 const showDetails = ref(true);
 const isMobile = ref(false);
@@ -92,21 +101,10 @@ function fmtP(kzt) {
 function fmtTopValue(kzt) {
   if (isUsdMode.value && usdRate.value) {
     const usd = Math.round((Number(kzt) || 0) / usdRate.value);
-    return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(usd) + '\u00A0$';
+    return '$\u00A0' + new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(usd);
   }
   const kztVal = Math.round(Number(kzt) || 0);
   return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(kztVal) + '\u00A0₸';
-}
-
-// Адаптивный размер шрифта для верхних бейджей
-function badgeFontStyle(kzt) {
-  const text = fmtTopValue(kzt);
-  const len = text.length;
-  // Короткие значения — без изменений (CSS по умолчанию)
-  if (len <= 9) return {};
-  // Чем длиннее — тем меньше шрифт
-  const scale = Math.max(0.45, 9 / len);
-  return { fontSize: `calc(var(--badge-base-size, 1em) * ${scale.toFixed(2)})` };
 }
 
 const KZT_FIXED_RIDERS = new Set(['trauma', 'hospitalization']);
@@ -114,83 +112,42 @@ function fmtRiderSum(key, kzt) {
   return KZT_FIXED_RIDERS.has(key) ? fmt(kzt) : fmtP(kzt);
 }
 
-const TIP = {
-  sumAssured: {
-    title: 'Страховая сумма',
-    text: 'Ключевой параметр вашего полиса, определяющий <b>масштаб накоплений и защиты</b>.<br><br>На протяжении всего срока эта сумма обеспечивает сохранность вашего финансового плана. К концу полиса накопленный капитал выплачивается вам.<br><br>Чем выше страховая сумма — тем значительнее итоговые накопления.',
-  },
-  totalPremium: {
-    title: 'Итого взнос',
-    text: 'Ваш регулярный вклад в формирование капитала с учётом <b>всех выбранных покрытий</b>.<br><br>Большая часть взноса направляется на <b>накопления</b>, которые растут с гарантированным доходом. Меньшая часть — на защиту вашего плана.<br><br>Сумма указана в выбранной вами периодичности.',
-  },
-  details: {
-    title: 'Детализация по покрытиям',
-    text: 'Разбивка взноса по каждому виду защиты.<br><br>Основу составляет <b>накопительное покрытие</b> — именно оно формирует ваш капитал. Дополнительные покрытия (райдеры) защищают ваш план от непредвиденных событий, не затрагивая накопленные средства.',
-  },
-  colCoverage: {
-    title: 'Покрытие',
-    text: 'Вид защиты в рамках вашего полиса.<br><br><b>Основное покрытие</b> — накопительная программа, которая формирует ваш капитал. <b>Дополнительные покрытия</b> (райдеры) — надбавки, защищающие ваш план и доход от конкретных рисков.',
-  },
-  colSum: {
-    title: 'Страховая сумма',
-    text: 'Размер защиты по данному виду покрытия.<br><br>Для основного покрытия — это также ориентир вашего итогового капитала. Для дополнительных покрытий — сумма поддержки при конкретном страховом случае.',
-  },
-  colPremium: {
-    title: 'Взнос по покрытию',
-    text: 'Часть вашего общего взноса, направленная на данный вид защиты.<br><br>Взнос по основному покрытию — это ваш вклад в накопления. Взносы по райдерам — стоимость дополнительной защиты плана.<br><br>Сумма всех взносов = итоговый взнос по полису.',
-  },
-  annuityTop: {
-    title: 'Аннуитетная выплата',
-    text: 'Регулярная выплата из накопленной суммы при включенном аннуитете. Показывается с выбранной периодичностью и сроком выплат.',
-  },
-};
-
 const props = defineProps({ result: { type: Object, default: null } });
 
-const FREQ_LABELS = {
-  annual: 'Раз в год', semiannual: 'Раз в полгода',
-  quarterly: 'Раз в квартал', monthly: 'Раз в месяц', single: 'Единовременный',
-};
-const RIDER_LABELS = {
-  accidental_death: 'Смерть от НС',
-  disability_accident_lumpsum: 'Инвалидность I, II гр. от НС',
-  trauma: 'Телесные травмы от НС',
-  hospitalization: 'Госпитализация от НС',
-};
+// Options for v-fit-text on the main badge values — shrinks to fit container
+const badgeFitOpts = computed(() => ({
+  min: 18,
+  max: props.result?.annuityPayment > 0 ? 52 : 86,
+}));
+
+const FREQ_LABELS = computed(() => dict.value.form.freq);
+const ANNUITY_FREQ_LABELS = computed(() => dict.value.form.annuityFreq);
+const RIDER_LABELS = computed(() => dict.value.results.riderLabels);
 
 const animated = reactive({ sumAssured: 0, grossPremium: 0, totalPremium: 0, annuityPayment: 0 });
 const animatedRiders = reactive({});
 
-const annuityFreqLabel = computed(() => FREQ_LABELS[props.result?.annuity?.annuityFrequency] ?? 'Раз в год');
+const annuityFreqLabel = computed(() => ANNUITY_FREQ_LABELS.value[props.result?.annuity?.annuityFrequency] ?? ANNUITY_FREQ_LABELS.value.annual);
 
 const saDescription = computed(() => {
-  const parts = ['По Основному покрытию'];
+  const parts = [t('results.byBase')];
   const riders = props.result?.riders ?? {};
-  if (riders.accidental_death?.riderPremium > 0) parts.push('при Смерти от НС');
-  if (riders.disability_accident_lumpsum?.riderPremium > 0) parts.push('при Инвалидности 1 или 2 гр. от НС');
+  if (riders.accidental_death?.riderPremium > 0) parts.push(t('results.atAccidentalDeath'));
+  if (riders.disability_accident_lumpsum?.riderPremium > 0) parts.push(t('results.atDisability'));
   return parts.join(', ');
 });
-const premiumFreqLabel = computed(() => FREQ_LABELS[props.result?.frequency] ?? '');
+const premiumFreqLabel = computed(() => FREQ_LABELS.value[props.result?.frequency] ?? '');
 const termText = computed(() => pluralYears(Number(props.result?.term ?? 0)));
 const annuityTermText = computed(() => pluralYears(Number(props.result?.annuity?.annuityTerm ?? 0)));
 const guaranteedPeriodText = computed(() => pluralYears(Number(props.result?.annuity?.guaranteedPeriod ?? 0)));
 
 const coverageRows = computed(() =>
   Object.entries(props.result?.riders ?? {})
-    .filter(([n, r]) => RIDER_LABELS[n] && (r?.riderPremium ?? 0) > 0)
-    .map(([n, r]) => ({ key: n, label: RIDER_LABELS[n], sum: r.riderSum ?? 0, premium: r.riderPremium ?? 0 }))
+    .filter(([n, r]) => RIDER_LABELS.value[n] && (r?.riderPremium ?? 0) > 0)
+    .map(([n, r]) => ({ key: n, label: RIDER_LABELS.value[n], sum: r.riderSum ?? 0, premium: r.riderPremium ?? 0 }))
 );
 
-function fmt(v) { return formatMoney(v, 'KZT'); }
-
-function pluralYears(years) {
-  if (!years) return '0 лет';
-  const mod10 = years % 10;
-  const mod100 = years % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${years} год`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${years} года`;
-  return `${years} лет`;
-}
+function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
 
 function animateTo(key, target, duration = 700) {
   const start = Number(animated[key] || 0), end = Number(target || 0), t0 = performance.now();
@@ -235,6 +192,30 @@ watch(() => props.result, (r) => {
 <style scoped>
 .results-summary { display: flex; flex-direction: column; gap: 16px; }
 
+/* Section header — shown only when columns stack (≤1120px) */
+.result-section-header { display: none; }
+@media (max-width: 1120px) {
+  .result-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0 4px;
+  }
+  .rsh-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(25,118,210,0.25), rgba(25,118,210,0.25), transparent);
+  }
+  .rsh-text {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--primary, #1976D2);
+    white-space: nowrap;
+  }
+}
+
 @keyframes fadeInCard {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -266,26 +247,27 @@ watch(() => props.result, (r) => {
 .badge-label {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-size: clamp(12px, 0.9vw, 15px);
+  font-size: 15px;
   font-weight: 800;
   color: var(--text-light);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .badge-value {
   font-family: 'SF Mono', 'Menlo', monospace;
-  --badge-base-size: clamp(40px, 4.2vw, 86px);
-  font-size: var(--badge-base-size);
+  font-size: 86px;
   font-weight: 800;
   line-height: 1.02;
   white-space: nowrap;
+  max-width: 100%;
 }
 .top-badges.has-annuity .badge-value {
-  --badge-base-size: clamp(32px, 2.8vw, 56px);
-  font-size: var(--badge-base-size);
+  font-size: 52px;
 }
 
 /* ── Badge color themes ───────────────── */
@@ -333,14 +315,11 @@ watch(() => props.result, (r) => {
   min-height: auto;
   padding: 12px 18px;
 }
-.top-badges.has-annuity .badge-value {
-  font-size: clamp(32px, 2.1vw, 46px);
-}
 .top-badges.has-annuity .badge-freq {
-  font-size: clamp(12px, 0.86vw, 15px);
+  font-size: 14px;
 }
 .top-badges.has-annuity .badge-sub {
-  font-size: clamp(11px, 0.78vw, 14px);
+  font-size: 13px;
 }
 
 .total-block {
@@ -518,37 +497,48 @@ watch(() => props.result, (r) => {
     min-height: auto;
     padding: 10px 12px;
   }
-  .badge-value { --badge-base-size: clamp(28px, 12vw, 56px); font-size: var(--badge-base-size); white-space: nowrap; }
-  .top-badges.has-annuity .badge-value { --badge-base-size: clamp(24px, 11vw, 50px); font-size: var(--badge-base-size); }
-  .badge-freq { font-size: clamp(11px, 3.5vw, 14px); }
-  .badge-label { font-size: clamp(11px, 4vw, 16px); white-space: nowrap; }
-  .badge-sub { font-size: clamp(9px, 3vw, 12px); }
+  .badge-freq { font-size: 14px; }
+  .badge-sub { font-size: 12px; }
   .badge-meta { margin-top: 2px; gap: 2px; }
 }
 
 @media (max-width: 720px) {
-  .total-block { padding: 6px; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,0.2), 0 0 0 1px rgba(66,165,245,0.08); overflow: hidden; }
-  .total-block h3 { font-size: clamp(11px, 3.5vw, 13px); gap: 6px; margin-bottom: 8px; }
-  .total-block h3 .icon { width: 26px; height: 26px; font-size: 14px; }
-
-  .total-header-row, .total-row {
-    grid-template-columns: 1fr 1fr 0.6fr;
+  .detail-summary-card {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .dsc-left {
+    margin-right: 0;
     gap: 2px;
   }
-  .total-header-row { padding-bottom: 5px; margin-bottom: 3px; }
+  .dsc-title { font-size: 15px; }
+  .dsc-sub { font-size: 11px; }
+  .dsc-value {
+    font-size: 18px;
+  }
+
+  .total-block { padding: 10px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.2), 0 0 0 1px rgba(66,165,245,0.08); overflow: hidden; }
+  .total-block h3 { font-size: 15px; gap: 6px; margin-bottom: 8px; }
+  .total-block h3 .icon { width: 28px; height: 28px; font-size: 15px; }
+
+  .total-header-row, .total-row {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: 4px;
+  }
+  .total-header-row { padding-bottom: 6px; margin-bottom: 4px; }
   .hcol-full { display: none; }
   .hcol-short { display: inline; }
   .hcol-label, .hcol-sum, .hcol-prem {
-    font-size: clamp(5px, 2vw, 7px);
-    letter-spacing: 0.2px;
+    font-size: 10px;
+    letter-spacing: 0.3px;
   }
   .total-row {
-    padding: 5px 0;
+    padding: 7px 0;
   }
-  .total-label { font-size: clamp(7px, 2.8vw, 10px); }
+  .total-label { font-size: 12px; opacity: 1; }
   .total-sum,
   .total-value {
-    font-size: clamp(7px, 2.8vw, 10px);
+    font-size: 13px;
   }
 
   .total-row.two-col {
@@ -582,18 +572,16 @@ watch(() => props.result, (r) => {
 }
 
 @media (max-width: 400px) {
-  .total-block { padding: 4px; max-width: 100%; }
+  .total-block { padding: 8px; max-width: 100%; }
   .total-header-row, .total-row {
-    grid-template-columns: 0.9fr 1fr 0.6fr;
-    gap: 1px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.85fr);
+    gap: 3px;
   }
-  .total-label { font-size: 7px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .total-sum, .total-value { font-size: 7px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .hcol-label, .hcol-sum, .hcol-prem { font-size: 5px; }
-  .total-row.two-col .total-label { font-size: 11px; }
-  .total-row.two-col .total-value.big { font-size: clamp(14px, 5vw, 20px); white-space: nowrap; }
-  .annuity-row { font-size: 11px; }
-  .annuity-val { font-size: clamp(14px, 5vw, 20px); white-space: nowrap; }
-  .annuity-box { overflow: hidden; }
+  .total-label { font-size: 11px; min-width: 0; overflow: hidden; text-overflow: ellipsis; opacity: 1; }
+  .total-sum, .total-value { font-size: 11px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .hcol-label, .hcol-sum, .hcol-prem { font-size: 9px; }
+  .dsc-title { font-size: 14px; }
+  .dsc-sub { font-size: 10px; }
+  .dsc-value { font-size: 16px; }
 }
 </style>

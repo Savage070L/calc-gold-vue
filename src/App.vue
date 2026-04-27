@@ -7,7 +7,35 @@
 </template>
 
 <script setup>
+import { onMounted, onBeforeUnmount } from 'vue';
 import InsuranceCalculator from './components/InsuranceCalculator.vue';
+
+// ── iframe height sync ───────────────────────────────────────────
+// When embedded in a parent site via <iframe>, post the current document
+// height so the parent can resize the iframe to avoid inner scrollbars and
+// empty space below the content.
+let resizeObserver = null;
+let lastHeight = 0;
+
+function sendHeight() {
+  if (window.parent === window) return; // not inside an iframe — nothing to do
+  const h = document.documentElement.scrollHeight;
+  if (h === lastHeight) return;
+  lastHeight = h;
+  window.parent.postMessage({ type: 'resize', height: h }, '*');
+}
+
+onMounted(() => {
+  sendHeight();
+  resizeObserver = new ResizeObserver(sendHeight);
+  resizeObserver.observe(document.body);
+  window.addEventListener('load', sendHeight);
+});
+
+onBeforeUnmount(() => {
+  if (resizeObserver) resizeObserver.disconnect();
+  window.removeEventListener('load', sendHeight);
+});
 </script>
 
 <style>
@@ -22,11 +50,11 @@ import InsuranceCalculator from './components/InsuranceCalculator.vue';
   --secondary-pale:  #E8F5E9;
 
   /* Surfaces */
-  --bg:          #EEF2F7;
-  --surface:     #F5F8FF;
+  --bg:          #FFFFFF;
+  --surface:     #FFFFFF;
   --panel-dark:  #0B1F35;
   --panel-dark-2:#152D4A;
-  --panel-light: #F5F8FF;
+  --panel-light: #FFFFFF;
 
   /* Text */
   --text-main:   #1A2E3F;
@@ -37,12 +65,12 @@ import InsuranceCalculator from './components/InsuranceCalculator.vue';
   /* Borders */
   --border-color: rgba(25,118,210,0.14);
 
-  /* Neumorphic shadows (blue-tinted) */
-  --shadow-out:    6px 6px 14px rgba(150,175,210,0.4), -6px -6px 14px rgba(255,255,255,0.92);
-  --shadow-out-sm: 3px 3px 7px  rgba(150,175,210,0.36), -3px -3px 7px  rgba(255,255,255,0.88);
-  --shadow-in:     inset 3px 3px 7px rgba(150,175,210,0.32), inset -3px -3px 7px rgba(255,255,255,0.85);
-  --shadow-btn:    4px 4px 9px  rgba(150,175,210,0.38), -4px -4px 9px  rgba(255,255,255,0.88);
-  --shadow-btn-press: inset 2px 2px 5px rgba(150,175,210,0.3), inset -2px -2px 5px rgba(255,255,255,0.75);
+  /* Soft shadows (for white background) */
+  --shadow-out:    0 2px 10px rgba(25,60,110,0.08), 0 1px 3px rgba(25,60,110,0.05);
+  --shadow-out-sm: 0 1px 4px rgba(25,60,110,0.06);
+  --shadow-in:     inset 0 1px 2px rgba(25,60,110,0.06);
+  --shadow-btn:    0 2px 6px rgba(25,60,110,0.08), 0 1px 2px rgba(25,60,110,0.05);
+  --shadow-btn-press: inset 0 1px 3px rgba(25,60,110,0.12);
 
   --radius: 20px;
 }
@@ -153,7 +181,7 @@ input[type="range"]::-moz-range-thumb {
   flex-shrink: 0;
 }
 
-.app-main { min-height: calc(100vh - 64px); background: var(--bg); }
+.app-main { min-height: calc(100vh - 64px); background: #FFFFFF; }
 
 @media (max-width: 720px) {
   .app-header { padding: 10px 14px; flex-wrap: wrap; gap: 6px; }
@@ -164,9 +192,9 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 860px) {
   :root {
-    --shadow-out:    2px 2px 8px rgba(150,175,210,0.25), -2px -2px 6px rgba(255,255,255,0.6);
-    --shadow-out-sm: 1px 1px 4px rgba(150,175,210,0.2), -1px -1px 4px rgba(255,255,255,0.5);
-    --shadow-btn:    2px 2px 6px rgba(150,175,210,0.25), -2px -2px 6px rgba(255,255,255,0.6);
+    --shadow-out:    0 2px 6px rgba(25,60,110,0.07);
+    --shadow-out-sm: 0 1px 3px rgba(25,60,110,0.05);
+    --shadow-btn:    0 1px 4px rgba(25,60,110,0.07);
     --radius: 14px;
   }
 }

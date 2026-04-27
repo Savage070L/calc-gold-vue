@@ -4,8 +4,8 @@
     <!-- Toggle button -->
     <button class="toggle-btn" @click="showTable = !showTable">
       <span class="btn-icon">📋</span>
-      <span>Таблица выкупной суммы</span>
-      <InfoTooltip v-bind="TIP.table" />
+      <span>{{ t('table.toggle') }}</span>
+      <InfoTooltip v-bind="tip('table')" />
       <span class="btn-arrow">{{ showTable ? '▲' : '▼' }}</span>
     </button>
 
@@ -13,19 +13,22 @@
     <div v-if="showTable" class="table-card">
       <div class="table-wrapper">
         <table class="data-table">
+          <colgroup>
+            <col class="c-year" />
+            <col class="c-date" />
+            <col class="c-surrender" />
+          </colgroup>
           <thead>
             <tr>
-              <th class="th-year">Год <InfoTooltip v-bind="TIP.colYear" /></th>
-              <th class="th-date">Дата <InfoTooltip v-bind="TIP.colDate" /></th>
-              <th class="th-age">Возраст <InfoTooltip v-bind="TIP.colAge" /></th>
-              <th class="th-surrender">Выкупная сумма <InfoTooltip v-bind="TIP.colSurrender" /></th>
+              <th class="th-year">{{ t('table.year') }} <InfoTooltip v-bind="tip('colYear')" /></th>
+              <th class="th-date">{{ t('table.date') }} <InfoTooltip v-bind="tip('colDate')" /></th>
+              <th class="th-surrender">{{ t('table.surrender') }} <InfoTooltip v-bind="tip('colSurrender')" /></th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, idx) in tableRows" :key="row.year" :class="{ even: idx % 2 === 0 }">
               <td class="col-year">{{ row.year }}</td>
               <td class="col-date">{{ policyDate(row.year) }}</td>
-              <td class="col-age">{{ row.age }}</td>
               <td class="col-surrender">
                 {{ fmtP(row.surrender) }}
               </td>
@@ -43,7 +46,9 @@ import { ref, computed } from 'vue';
 import { formatMoney } from '../composables/useInsuranceCalc.js';
 import { useCurrencyRate } from '../composables/useCurrencyRate.js';
 import InfoTooltip from './InfoTooltip.vue';
+import { useI18n } from '../i18n/index.js';
 
+const { t, tip } = useI18n();
 const { usdRate, currencyMode, toUsdStr } = useCurrencyRate();
 
 const isUsdMode = computed(() => currencyMode.value === 'USD' && !!usdRate.value);
@@ -51,29 +56,6 @@ const isUsdMode = computed(() => currencyMode.value === 'USD' && !!usdRate.value
 function fmtP(kzt) {
   return isUsdMode.value ? (toUsdStr(kzt) ?? fmt(kzt)) : fmt(kzt);
 }
-
-const TIP = {
-  table: {
-    title: 'Таблица выкупной суммы',
-    text: '<b>Выкупная сумма</b> — это ваши <b>накопленные средства</b> на каждую конкретную дату полиса.<br><br>Таблица показывает, сколько капитала вы сформируете к каждому году. В начале накопления только набирают темп — это нормально. Год за годом капитал уверенно растёт.<br><br>Для максимального результата рекомендуется держать полис до конца срока или не менее <b>5–7 лет</b>.',
-  },
-  colYear: {
-    title: 'Год страхования',
-    text: 'Порядковый номер года с момента начала накоплений по полису.<br><br>Год <b>1</b> — первый год формирования капитала, год <b>20</b> — последний для полиса сроком 20 лет.',
-  },
-  colDate: {
-    title: 'Дата',
-    text: 'Конкретная дата завершения каждого года страхования (годовщина заключения договора).<br><br>Именно на эту дату рассчитывается размер ваших накопленных средств.',
-  },
-  colAge: {
-    title: 'Возраст',
-    text: 'Ваш возраст на дату завершения каждого года накоплений.<br><br>Используйте этот столбец, чтобы видеть: в каком возрасте вы достигнете той или иной суммы накоплений.',
-  },
-  colSurrender: {
-    title: 'Выкупная сумма',
-    text: 'Ваш накопленный капитал к данному году полиса.<br><br>• В первые годы может быть чуть ниже суммы взносов — накопления только набирают темп<br>• Год за годом уверенно растёт<br>• К концу срока достигает <b>максимального значения</b> — это ваш итоговый капитал',
-  },
-};
 
 const props = defineProps({ result: { type: Object, default: null } });
 
@@ -87,7 +69,7 @@ function policyDate(yearNum) {
   return `${d}.${m}.${parseInt(y, 10) + yearNum}`;
 }
 
-function fmt(v) { return formatMoney(v, 'KZT'); }
+function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
 </script>
 
 <style scoped>
@@ -137,11 +119,15 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
 /* ── Table ─────────────────────────── */
 .data-table {
   width: 100%;
-  min-width: 620px;
-  table-layout: fixed;       /* equal column widths */
+  min-width: 420px;
+  table-layout: fixed;
   border-collapse: collapse;
   font-family: 'SF Mono', 'Menlo', monospace;
 }
+
+.data-table col.c-year      { width: 100px; }
+.data-table col.c-date      { width: 300px; }
+.data-table col.c-surrender { width: auto; }
 
 /* Header */
 .data-table thead tr {
@@ -155,7 +141,6 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
   text-transform: uppercase; letter-spacing: 0.5px;
   white-space: normal;
   border: none;
-  width: 25%;   /* all 4 columns equal */
 }
 
 /* Rows */
@@ -194,11 +179,6 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
 .col-date {
   font-size: 16px; font-weight: 600;
   color: #3A5A7A;
-}
-
-/* Age — same as base td */
-.col-age {
-  font-size: 16px; font-weight: 600;
 }
 
 /* Surrender value */
@@ -240,10 +220,9 @@ function fmt(v) { return formatMoney(v, 'KZT'); }
     font-size: 14px;
   }
 
-  .th-year   { width: 3%; }
-  .th-date   { width: 28%; }
-  .th-age    { width: 12%; }
-  .th-surrender { width: 57%; }
+  .data-table col.c-year      { width: 40px; }
+  .data-table col.c-date      { width: 110px; }
+  .data-table col.c-surrender { width: auto; }
 
   .data-table th {
     font-size: 10px;

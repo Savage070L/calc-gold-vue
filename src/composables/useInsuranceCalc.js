@@ -7,6 +7,7 @@ import { ActuarialEngine } from '../core/actuarial.js';
 import { PolicyCalculator } from '../core/calculator.js';
 import { RidersCalculator } from '../core/riders.js';
 import { PRODUCT_CONFIG } from '../config/product.js';
+import { useI18n } from '../i18n/index.js';
 
 const ALLOWED_RIDERS = [
   'accidental_death',
@@ -37,6 +38,7 @@ export function formatMoney(value, currency = '') {
 }
 
 export function validateInputs(inputs) {
+  const { t } = useI18n();
   const errors = [];
   const {
     dob,
@@ -54,50 +56,50 @@ export function validateInputs(inputs) {
   const { minTerm, maxTerm, maxExitAge } = PRODUCT_CONFIG;
 
   if (!dob) {
-    errors.push('Укажите дату рождения');
+    errors.push(t('errors.dobRequired'));
   } else {
     const age = PolicyCalculator.calculateAge(dob);
     if (age < 0 || age > 80) {
-      errors.push('Некорректная дата рождения');
+      errors.push(t('errors.dobInvalid'));
     }
     const exitAge = age + (term || 0);
     if (exitAge > maxExitAge) {
-      errors.push(`Возраст на конец договора (${exitAge}) превышает допустимый (${maxExitAge})`);
+      errors.push(t('errors.exitAgeExceeds', { exitAge, max: maxExitAge }));
     }
   }
 
   if (!gender || !['male', 'female'].includes(gender)) {
-    errors.push('Укажите пол');
+    errors.push(t('errors.genderRequired'));
   }
 
   if (!term || term < minTerm || term > maxTerm) {
-    errors.push(`Срок договора должен быть от ${minTerm} до ${maxTerm} лет`);
+    errors.push(t('errors.termRange', { min: minTerm, max: maxTerm }));
   }
 
   if (!frequency) {
-    errors.push('Укажите периодичность');
+    errors.push(t('errors.frequencyRequired'));
   }
 
   if (mode === 'sa_to_premium') {
     if (!sumAssured || sumAssured <= 0) {
-      errors.push('Укажите страховую сумму больше 0');
+      errors.push(t('errors.sumAssuredRequired'));
     }
   } else if (!premium || premium <= 0) {
-    errors.push('Укажите премию больше 0');
+    errors.push(t('errors.premiumRequired'));
   }
 
   if (enableAnnuity) {
     if (!annuityFrequency) {
-      errors.push('Укажите периодичность аннуитетных выплат');
+      errors.push(t('errors.annuityFrequencyRequired'));
     }
     if (!annuityTerm || annuityTerm <= 0) {
-      errors.push('Укажите срок аннуитетных выплат (больше 0)');
+      errors.push(t('errors.annuityTermRequired'));
     }
     if (guaranteedPeriod === undefined || guaranteedPeriod === null || guaranteedPeriod < 0) {
-      errors.push('Укажите гарантированный период (0 или больше)');
+      errors.push(t('errors.guaranteedPeriodRequired'));
     }
     if ((annuityTerm || 0) > 0 && guaranteedPeriod > annuityTerm) {
-      errors.push('Гарантированный период не может быть больше срока аннуитетных выплат');
+      errors.push(t('errors.guaranteedPeriodMax'));
     }
   }
 
