@@ -138,14 +138,12 @@ onMounted(fetchRate);
   border: 1px solid rgba(66, 165, 245, 0.18);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15);
   transition: border-color 0.2s ease;
   height: 40px;
   box-sizing: border-box;
 }
 .cw-wrap:focus-within {
   border-color: #42A5F5;
-  box-shadow: 0 1px 4px rgba(66, 165, 245, 0.18);
 }
 .cw--manual {
   border-color: rgba(255, 183, 77, 0.35);

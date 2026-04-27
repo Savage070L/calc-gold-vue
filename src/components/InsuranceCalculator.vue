@@ -166,15 +166,14 @@ watch(result, (r, prev) => {
   --accent:           #42A5F5;
   --accent-hover:     #90CAF9;
   --border-color:     rgba(66,165,245,0.22);
-  --shadow-btn:       3px 3px 8px rgba(0,0,0,0.55), -1px -1px 4px rgba(20,60,110,0.12);
-  --shadow-out-sm:    2px 2px 6px rgba(0,0,0,0.45), -1px -1px 3px rgba(20,60,110,0.1);
-  --shadow-in:        inset 3px 3px 7px rgba(0,0,0,0.55), inset -2px -2px 4px rgba(20,60,110,0.1);
-  --shadow-btn-press: inset 2px 2px 5px rgba(0,0,0,0.5), inset -1px -1px 3px rgba(20,60,110,0.1);
+  --shadow-btn:       none;
+  --shadow-out-sm:    none;
+  --shadow-in:        none;
+  --shadow-btn-press: none;
 
   background: linear-gradient(170deg, #163456 0%, #0B1F35 60%, #071525 100%);
   border-radius: 22px;
   padding: 1.4rem 1.3rem 1.6rem;
-  box-shadow: 0 10px 36px rgba(0,0,0,0.42), 0 0 0 1px rgba(66,165,245,0.09);
 }
 
 /* ── Riders Card (dark navy) ───────────────── */
@@ -184,14 +183,13 @@ watch(result, (r, prev) => {
   --text-light:   #7FB3D3;
   --accent:       #42A5F5;
   --border-color: rgba(66,165,245,0.22);
-  --shadow-in:    inset 3px 3px 7px rgba(0,0,0,0.55), inset -2px -2px 4px rgba(20,60,110,0.1);
-  --shadow-btn:   3px 3px 8px rgba(0,0,0,0.55), -1px -1px 4px rgba(20,60,110,0.12);
-  --shadow-btn-press: inset 2px 2px 5px rgba(0,0,0,0.5), inset -1px -1px 3px rgba(20,60,110,0.1);
+  --shadow-in:    none;
+  --shadow-btn:   none;
+  --shadow-btn-press: none;
 
   background: linear-gradient(135deg, #152D4A 0%, #0B1F35 100%);
   border-radius: 22px;
   padding: 16px 18px;
-  box-shadow: 0 10px 32px rgba(0,0,0,0.38), 0 0 0 1px rgba(66,165,245,0.09);
 }
 
 .riders-card-header {
@@ -253,7 +251,6 @@ watch(result, (r, prev) => {
   color: var(--text-light, #5A7A96); font-size: 14px; font-weight: 500;
   background: var(--surface, #F5F8FF);
   border-radius: 20px;
-  box-shadow: 6px 6px 14px rgba(150,175,210,0.4), -6px -6px 14px rgba(255,255,255,0.92);
 }
 .loading-dots { display: flex; gap: 5px; }
 .loading-dots span {
@@ -299,6 +296,22 @@ watch(result, (r, prev) => {
   .riders-card-header {
     font-size: 16px;
     letter-spacing: 0.6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .insurance-calculator {
+    padding: 4px;
+    gap: 8px;
+  }
+  .form-card,
+  .riders-card {
+    padding: 10px;
+    border-radius: 14px;
+  }
+  .riders-card-header {
+    font-size: 14px;
+    letter-spacing: 0.4px;
   }
 }
 </style>

@@ -108,11 +108,8 @@ const popupStyle = computed(() => ({
   position: fixed;
   z-index: 9999;
   background: #ffffff;
+  border: 1px solid rgba(25,118,210,0.18);
   border-radius: 14px;
-  box-shadow:
-    0 12px 40px rgba(0,0,0,0.18),
-    0 4px 12px rgba(0,0,0,0.10),
-    0 0 0 1px rgba(0,0,0,0.06);
   width: 320px;
   overflow: hidden;
   animation: popIn 0.18s cubic-bezier(0.34,1.56,0.64,1) both;

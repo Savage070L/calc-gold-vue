@@ -84,12 +84,11 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
   display: flex; align-items: center; gap: 10px;
   padding: 14px 18px;
   background: var(--surface, #F5F8FF);
-  border: 1px solid var(--border-color, rgba(25,118,210,0.14));
+  border: 2px solid rgba(25,118,210,0.40);
   border-radius: 16px;
   font-size: 15px; font-weight: 600;
   color: var(--text-main, #1A2E3F);
   cursor: pointer;
-  box-shadow: var(--shadow-out);
   transition: all 0.2s ease;
   text-align: left;
 }
@@ -105,8 +104,8 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
 /* ── Table card ────────────────────── */
 .table-card {
   background: var(--surface, #F5F8FF);
+  border: 2px solid rgba(25,118,210,0.40);
   border-radius: 16px;
-  box-shadow: var(--shadow-out);
   animation: slideDown 0.3s ease-out both;
   overflow: hidden;
   margin-top: 6px;

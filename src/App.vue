@@ -65,12 +65,12 @@ onBeforeUnmount(() => {
   /* Borders */
   --border-color: rgba(25,118,210,0.14);
 
-  /* Soft shadows (for white background) */
-  --shadow-out:    0 2px 10px rgba(25,60,110,0.08), 0 1px 3px rgba(25,60,110,0.05);
-  --shadow-out-sm: 0 1px 4px rgba(25,60,110,0.06);
-  --shadow-in:     inset 0 1px 2px rgba(25,60,110,0.06);
-  --shadow-btn:    0 2px 6px rgba(25,60,110,0.08), 0 1px 2px rgba(25,60,110,0.05);
-  --shadow-btn-press: inset 0 1px 3px rgba(25,60,110,0.12);
+  /* Shadows disabled — flat UI on white background */
+  --shadow-out:       none;
+  --shadow-out-sm:    none;
+  --shadow-in:        none;
+  --shadow-btn:       none;
+  --shadow-btn-press: none;
 
   --radius: 20px;
 }
@@ -105,19 +105,16 @@ input[type="range"]::-webkit-slider-thumb {
   width: 22px; height: 22px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary-light), var(--primary));
-  box-shadow: 0 2px 8px rgba(25,118,210,0.45), 0 0 0 2px rgba(66,165,245,0.3);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease;
 }
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.15);
-  box-shadow: 0 3px 10px rgba(25,118,210,0.55), 0 0 0 3px rgba(66,165,245,0.4);
 }
 input[type="range"]::-moz-range-thumb {
   width: 22px; height: 22px;
   border: none; border-radius: 50%;
   background: linear-gradient(135deg, var(--primary-light), var(--primary));
-  box-shadow: 0 2px 8px rgba(25,118,210,0.45);
   cursor: pointer;
 }
 </style>
@@ -129,7 +126,6 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
   position: relative;
 }
 .app-header::after {

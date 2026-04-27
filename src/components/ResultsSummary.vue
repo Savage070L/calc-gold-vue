@@ -325,9 +325,9 @@ watch(() => props.result, (r) => {
 .total-block {
   background: var(--surface, #F5F8FF);
   color: #1B2838;
+  border: 2px solid rgba(25,118,210,0.40);
   border-radius: var(--radius, 20px);
   padding: 20px;
-  box-shadow: var(--shadow-out, 0 4px 16px rgba(0,0,0,0.08));
   animation: fadeInCard 0.55s ease-out both;
 }
 .detail-toggle {
@@ -490,7 +490,6 @@ watch(() => props.result, (r) => {
     border-radius: 14px;
     padding: 10px 12px;
     gap: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     overflow: hidden;
   }
   .top-badges.has-annuity .summary-badge {
@@ -517,7 +516,7 @@ watch(() => props.result, (r) => {
     font-size: 18px;
   }
 
-  .total-block { padding: 10px; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.2), 0 0 0 1px rgba(66,165,245,0.08); overflow: hidden; }
+  .total-block { padding: 10px; border-radius: 14px; overflow: hidden; }
   .total-block h3 { font-size: 15px; gap: 6px; margin-bottom: 8px; }
   .total-block h3 .icon { width: 28px; height: 28px; font-size: 15px; }
 

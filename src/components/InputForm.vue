@@ -505,7 +505,6 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 .radio-pill input:checked + span {
   background: linear-gradient(135deg, #BBD034, #47903C);
   color: white; border: none;
-  box-shadow: 0 2px 8px rgba(71,144,60,0.4);
 }
 .pill-faded span { opacity: 0.45; }
 
@@ -515,7 +514,6 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   background: linear-gradient(135deg, #BBD034, #47903C);
   color: white; font-size: 14px; font-weight: 800;
   padding: 3px 14px; border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(71,144,60,0.4);
   margin-right: 2px;
 }
 .term-slider { margin-top: 10px; width: 100%; }
@@ -575,8 +573,28 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 }
 
 @media (max-width: 720px) {
+  /* Grid/flex children should never overflow their container */
+  .input-form,
+  .form-grid,
+  .form-group,
+  .three-col-row,
+  .three-col-item,
+  .three-col-item--wide,
+  .three-col-item--narrow,
+  .three-col-item--slim {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .neu-input,
+  .input-wrap,
+  select,
+  input {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
 
@@ -614,16 +632,13 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
     line-height: 1.2;
     padding: 6px 8px;
     font-size: 9px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .radio-pill {
     flex: 1 1 0;
     min-width: 0;
-  }
-
-  .radio-pill span {
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .annuity-toggle-label {
@@ -633,5 +648,36 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   .toggle-text {
     font-size: 12px;
   }
+}
+
+@media (max-width: 480px) {
+  .form-title {
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+  .form-group label { font-size: 11px; }
+  .neu-input,
+  .input-wrap {
+    height: 36px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  .input-wrap .neu-input { font-size: 15px; }
+  .term-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+  }
+  .term-header {
+    gap: 6px;
+    padding-right: 0;
+  }
+  .form-grid { gap: 10px; }
+  .annuity-toggle-label {
+    padding: 9px 12px;
+    gap: 8px;
+  }
+  .toggle-text { font-size: 11px; letter-spacing: 0.03em; }
 }
 </style>
