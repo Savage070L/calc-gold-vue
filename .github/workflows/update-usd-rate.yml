@@ -14,6 +14,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # GitHub Pages serves from the `updated` branch /docs folder.
+          # Always operate on that branch so the rate file lands where
+          # the live site reads it from.
+          ref: updated
+          fetch-depth: 1
 
       - name: Fetch USD rate from NBRK
         run: |
@@ -58,6 +64,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit --amend -m "chore: update USD rate from NBRK"
-            git push --force
+            git commit -m "chore: update USD rate from NBRK"
+            git push origin HEAD:updated
           fi
