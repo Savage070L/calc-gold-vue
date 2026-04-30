@@ -924,16 +924,27 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   font-weight: 900;
 }
 
-/* DOB pill — sits at the top, next to the "ДАТА РОЖДЕНИЯ" label */
+/* DOB pill — sits below the date input, pointing up at it */
 .dob-group { position: relative; }
 .next-pill--floating {
   position: absolute;
-  top: -3px;          /* aligns vertical-center with the label row */
-  left: calc(100% + 4px);
+  top: calc(100% + 6px);          /* below the form-group */
+  left: 50%;
+  transform: translateX(-50%);
   margin-left: 0;
   white-space: nowrap !important;
   z-index: 10;
   pointer-events: none;
+  animation: pillBobUp 1.1s ease-in-out infinite !important;
+}
+.next-pill--floating::before {
+  content: '↑';
+  font-size: 13px;
+  font-weight: 900;
+}
+@keyframes pillBobUp {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-3px); }
 }
 @keyframes pillBob {
   0%, 100% { transform: translateX(0); }
@@ -947,8 +958,9 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
     margin-left: 6px;
     line-height: 1.2;
   }
-  /* DOB date input — more prominent border on mobile */
-  #dob.neu-input {
+  /* DOB & Gender — more prominent + symmetric borders on mobile */
+  #dob.neu-input,
+  .radio-pill span {
     border-width: 2px;
     border-color: rgba(95,189,245,0.60);
   }
