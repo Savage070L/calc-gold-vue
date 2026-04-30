@@ -4,8 +4,11 @@
 
     <div class="form-grid">
       <!-- Дата рождения | Пол -->
-      <div class="form-group">
-        <label for="dob">{{ t('form.dob') }}</label>
+      <div class="form-group" :class="{ 'attention-next': needsDob }">
+        <label for="dob" class="label-row">
+          {{ t('form.dob') }}
+          <span v-if="needsDob" class="next-pill">{{ t('form.nextStepDob') }}</span>
+        </label>
         <input
           id="dob"
           type="date"
@@ -14,11 +17,13 @@
           min="1900-01-01"
           class="neu-input"
         />
-        <span v-if="local.dob" class="hint">{{ t('form.age') }}: {{ currentAge }} {{ t('form.ageYears') }}</span>
       </div>
 
-      <div class="form-group">
-        <label>{{ t('form.gender') }}</label>
+      <div class="form-group" :class="{ 'attention-next': needsGender }">
+        <label class="label-row">
+          {{ t('form.gender') }}
+          <span v-if="needsGender" class="next-pill">{{ t('form.nextStepGender') }}</span>
+        </label>
         <div class="radio-group">
           <label class="radio-pill">
             <input type="radio" v-model="local.gender" value="male" />
@@ -31,37 +36,21 @@
         </div>
       </div>
 
-      <!-- Срок страхования — слайдер, на всю ширину -->
-      <div class="form-group term-group full-width">
-        <div class="term-header">
-          <label class="label-row">{{ t('form.term') }} <InfoTooltip v-bind="tip('term')" /></label>
-          <span class="term-badge">{{ pluralYears(local.term) }}</span>
-        </div>
-        <input
-          type="range"
-          v-model.number="local.term"
-          :min="minTerm"
-          :max="maxTermAllowed"
-          :style="termSliderStyle"
-          class="term-slider"
-        />
-        <span v-if="local.dob && local.term" class="hint">
-          {{ t('form.exitAge') }}: {{ exitAge }} {{ t('form.ageYears') }}
-          <span v-if="exitAge > maxExitAge" class="hint-warn"> ({{ t('form.exceeds') }} {{ maxExitAge }})</span>
-        </span>
-      </div>
-
-      <!-- Периодичность | Курс доллара | Сумма — в одну строку -->
+      <!-- Режим расчёта | Валюта расчёта | Курс доллара — в одну строку -->
       <div class="three-col-row full-width">
         <div class="form-group three-col-item three-col-item--wide">
-          <label for="frequency" class="label-row">{{ t('form.frequency') }} <InfoTooltip v-bind="tip('frequency')" /></label>
-          <select id="frequency" v-model="local.frequency" class="neu-input" :class="{ 'placeholder-shown': !local.frequency }">
-            <option value="" disabled>{{ t('form.freqPlaceholder') }}</option>
-            <option value="annual">{{ t('form.freq.annual') }}</option>
-            <option value="semiannual">{{ t('form.freq.semiannual') }}</option>
-            <option value="quarterly">{{ t('form.freq.quarterly') }}</option>
-            <option value="monthly">{{ t('form.freq.monthly') }}</option>
-            <option value="single">{{ t('form.freq.single') }}</option>
+          <label for="mode" class="label-row">{{ t('form.mode') }} <InfoTooltip v-bind="tip('mode')" /></label>
+          <select id="mode" v-model="local.mode" class="neu-input select-green">
+            <option value="premium_to_sa">{{ t('form.modePremiumToSa') }}</option>
+            <option value="sa_to_premium">{{ t('form.modeSaToPremium') }}</option>
+          </select>
+        </div>
+
+        <div class="form-group three-col-item three-col-item--wide">
+          <label for="currencyMode" class="label-row">{{ t('form.currencyToggleLabel') }}</label>
+          <select id="currencyMode" v-model="currencyMode" class="neu-input select-green">
+            <option value="USD" :disabled="!usdRate">{{ t('form.currencyUsd') }}</option>
+            <option value="KZT">{{ t('form.currencyKzt') }}</option>
           </select>
         </div>
 
@@ -80,77 +69,119 @@
           </label>
           <CurrencyWidget ref="cwRef" />
         </div>
+      </div>
 
-        <div class="form-group three-col-item three-col-item--narrow" v-if="local.mode === 'sa_to_premium'">
+      <!-- Сумма | Периодичность — в одну строку -->
+      <div class="two-col-row full-width">
+        <div class="form-group two-col-item" v-if="local.mode === 'sa_to_premium'" :class="{ 'attention-next': needsAmount }">
           <label for="sumAssured" class="label-row">
-            {{ t('form.sumAssured') }} ({{ isUsdInput ? 'USD' : 'KZT' }}) <InfoTooltip v-bind="tip('sumAssured')" />
+            {{ t('form.sumAssured') }} ({{ isUsdInput ? 'USD' : 'KZT' }})
+            <InfoTooltip v-bind="tip('sumAssured')" />
           </label>
           <div class="input-wrap">
-            <span v-if="isUsdInput" class="input-affix input-prefix">$</span>
+            <span v-if="isUsdInput && !needsAmount" class="input-affix input-prefix">$</span>
             <input
               ref="sumAssuredInput"
               id="sumAssured"
               type="text"
               inputmode="numeric"
               autocomplete="off"
-              :value="displaySumAssured"
-              @input="onSumInput"
-              class="neu-input"
+              :value="needsAmount ? t('form.nextStepAmount') : displaySumAssured"
+              :class="['neu-input', { 'hint-mode': needsAmount }]"
+              @focus="markAmountTouched"
+              @input="(e) => { markAmountTouched(); onSumInput(e); maybeAutoCommit(e); }"
+              @blur="commitAmount"
+              @keydown.enter="commitAmount"
             />
-            <span v-if="!isUsdInput" class="input-affix input-suffix">₸</span>
+            <span v-if="!isUsdInput && !needsAmount" class="input-affix input-suffix">₸</span>
           </div>
         </div>
 
-        <div class="form-group three-col-item three-col-item--narrow" v-if="local.mode === 'premium_to_sa'">
+        <div class="form-group two-col-item" v-if="local.mode === 'premium_to_sa'" :class="{ 'attention-next': needsAmount }">
           <label for="premium" class="label-row">
-            {{ t('form.premium') }} ({{ isUsdInput ? 'USD' : 'KZT' }}) <InfoTooltip v-bind="tip('premium')" />
+            {{ t('form.premium') }} ({{ isUsdInput ? 'USD' : 'KZT' }})
+            <InfoTooltip v-bind="tip('premium')" />
           </label>
           <div class="input-wrap">
-            <span v-if="isUsdInput" class="input-affix input-prefix">$</span>
+            <span v-if="isUsdInput && !needsAmount" class="input-affix input-prefix">$</span>
             <input
               ref="premiumInput"
               id="premium"
               type="text"
               inputmode="numeric"
               autocomplete="off"
-              :value="displayPremium"
-              @input="onPremInput"
-              class="neu-input"
+              :value="needsAmount ? t('form.nextStepAmount') : displayPremium"
+              :class="['neu-input', { 'hint-mode': needsAmount }]"
+              @focus="markAmountTouched"
+              @input="(e) => { markAmountTouched(); onPremInput(e); maybeAutoCommit(e); }"
+              @blur="commitAmount"
+              @keydown.enter="commitAmount"
             />
-            <span v-if="!isUsdInput" class="input-affix input-suffix">₸</span>
+            <span v-if="!isUsdInput && !needsAmount" class="input-affix input-suffix">₸</span>
           </div>
         </div>
-      </div>
 
-      <!-- Режим расчёта — на всю ширину, обе кнопки в одну строку -->
-      <div class="form-group full-width">
-        <label class="label-row">{{ t('form.mode') }} <InfoTooltip v-bind="tip('mode')" /></label>
-        <div class="mode-toggle">
-          <label class="radio-pill">
-            <input type="radio" v-model="local.mode" value="premium_to_sa" />
-            <span>{{ t('form.modePremiumToSa') }}</span>
+        <div class="form-group two-col-item" :class="{ 'attention-next': needsFrequency }">
+          <label for="frequency" class="label-row">
+            {{ t('form.frequency') }}
+            <InfoTooltip v-bind="tip('frequency')" />
+            <span v-if="needsFrequency" class="next-pill">{{ t('form.nextStep') }}</span>
           </label>
-          <label class="radio-pill">
-            <input type="radio" v-model="local.mode" value="sa_to_premium" />
-            <span>{{ t('form.modeSaToPremium') }}</span>
-          </label>
+          <select id="frequency" v-model="local.frequency" class="neu-input select-green" :class="{ 'placeholder-shown': !local.frequency }">
+            <option value="" disabled>{{ t('form.freqPlaceholder') }}</option>
+            <option value="annual">{{ t('form.freq.annual') }}</option>
+            <option value="semiannual">{{ t('form.freq.semiannual') }}</option>
+            <option value="quarterly">{{ t('form.freq.quarterly') }}</option>
+            <option value="monthly">{{ t('form.freq.monthly') }}</option>
+            <option value="single">{{ t('form.freq.single') }}</option>
+          </select>
         </div>
       </div>
 
-      <!-- Валюта взносов -->
-      <div class="form-group full-width">
-        <label class="label-row">{{ t('form.currencyToggleLabel') }}</label>
-        <div class="mode-toggle">
-          <label class="radio-pill" :class="{ 'pill-faded': !usdRate }">
-            <input type="radio" v-model="currencyMode" value="USD" />
-            <span>{{ t('form.currencyUsd') }}</span>
+      <!-- Срок страхования — слайдер, на всю ширину -->
+      <div class="form-group term-group full-width" :class="{ 'attention-next': needsTerm }">
+        <div class="term-header">
+          <label class="label-row">
+            {{ t('form.term') }}
+            <InfoTooltip v-bind="tip('term')" />
+            <span v-if="needsTerm" class="next-pill">{{ t('form.nextStepTerm') }}</span>
           </label>
-          <label class="radio-pill">
-            <input type="radio" v-model="currencyMode" value="KZT" />
-            <span>{{ t('form.currencyKzt') }}</span>
-          </label>
+          <span class="term-badge">
+            <input
+              type="text"
+              inputmode="numeric"
+              :value="termInteracted ? local.term : ''"
+              :style="{ width: termInputWidth }"
+              placeholder="__"
+              @focus="onTermBadgeFocus"
+              @click="onTermBadgeClick"
+              @input="onTermBadgeInput"
+              @blur="onTermBadgeBlur"
+              @keydown.enter.prevent="$event.target.blur()"
+              class="term-badge-input"
+              aria-label="Срок страхования"
+            />
+            <span class="term-badge-word">{{ termWord }}</span>
+          </span>
         </div>
+        <input
+          type="range"
+          v-model.number="local.term"
+          :min="minTerm"
+          :max="maxTermAllowed"
+          :style="termSliderStyle"
+          class="term-slider"
+          @mousedown="markTermInteraction"
+          @touchstart="markTermInteraction"
+          @keydown="markTermInteraction"
+          @input="markTermInteraction"
+          @change="markTermTouched"
+          @mouseup="markTermTouched"
+          @touchend="markTermTouched"
+          @keyup="markTermTouched"
+        />
       </div>
+
     </div>
 
     <div class="annuity-toggle-wrap">
@@ -169,7 +200,7 @@
       <!-- Периодичность выплат -->
       <div class="form-group full-width">
         <label for="annuityFrequency" class="label-row">{{ t('form.annuityFrequency') }} <InfoTooltip v-bind="tip('annuityFrequency')" /></label>
-        <select id="annuityFrequency" v-model="local.annuityFrequency" class="neu-input" required>
+        <select id="annuityFrequency" v-model="local.annuityFrequency" class="neu-input select-green" required>
           <option value="annual">{{ t('form.annuityFreq.annual') }}</option>
           <option value="semiannual">{{ t('form.annuityFreq.semiannual') }}</option>
           <option value="quarterly">{{ t('form.annuityFreq.quarterly') }}</option>
@@ -226,12 +257,108 @@ const { t, tip, pluralYears } = useI18n();
 const { currencyMode, usdRate } = useCurrencyRate();
 
 const props = defineProps({ modelValue: { type: Object, required: true } });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'term-touched', 'amount-committed']);
+
+function commitAmount(e) {
+  const v = e?.target?.value;
+  if (typeof v === 'string' && v.trim()) e.target.blur?.();
+  emit('amount-committed');
+}
+
+// Auto-advance to the next step once the user typed at least 2 digits.
+function maybeAutoCommit(e) {
+  const digits = String(e?.target?.value || '').replace(/\D/g, '');
+  if (digits.length >= 2) emit('amount-committed');
+}
 const { minTerm, maxTerm, maxExitAge } = PRODUCT_CONFIG;
 
 const local = ref({ ...props.modelValue });
 
 const todayIso = computed(() => new Date().toISOString().slice(0, 10));
+
+// Visual cue: sequentially highlight the next required field
+// (DOB → Gender → Term → Frequency → Amount). A first-time user clearly
+// sees what to fill in to get a minimum calculation.
+const touched = ref({ term: false, amount: false });
+
+// If user starts over (clears DOB), reset touch state.
+watch(() => local.value.dob, (v) => {
+  if (!v) touched.value = { term: false, amount: false };
+});
+const currentStep = computed(() => {
+  const v = local.value;
+  if (!v.dob) return 'dob';
+  if (!v.gender) return 'gender';
+  const amountFilled = v.mode === 'premium_to_sa'
+    ? (v.premium > 0)
+    : (v.sumAssured > 0);
+  if (!touched.value.amount && !amountFilled) return 'amount';
+  if (!touched.value.amount && amountFilled) return 'amount';
+  if (!v.frequency) return 'frequency';
+  if (!touched.value.term) return 'term';
+  return null;
+});
+
+const needsDob       = computed(() => currentStep.value === 'dob');
+const needsGender    = computed(() => currentStep.value === 'gender');
+const needsTerm      = computed(() => currentStep.value === 'term');
+const needsFrequency = computed(() => currentStep.value === 'frequency');
+const needsAmount    = computed(() => currentStep.value === 'amount');
+
+function markTermTouched()   { touched.value.term = true; emit('term-touched'); }
+// Local-only flag: any first interaction with the slider or badge.
+// Used to switch the badge from "___ лет" placeholder to the actual value.
+const termInteracted = ref(false);
+function markTermInteraction() { termInteracted.value = true; }
+function markAmountTouched() { touched.value.amount = true; }
+
+// Editable term badge: only the word ("год"/"года"/"лет"/"жыл") next to the input.
+const termWord = computed(() => {
+  const full = pluralYears(local.value.term);
+  return full.replace(/^\d+\s*/, '');
+});
+const termInputWidth = computed(() => {
+  const len = termInteracted.value
+    ? (String(local.value.term ?? '').length || 1)
+    : 2; // placeholder "__" reserves 2 char-widths
+  return `${Math.max(len, 1) * 0.75 + 0.4}em`;
+});
+
+function placeCaretAtEnd(input) {
+  if (!input || typeof input.setSelectionRange !== 'function') return;
+  // Defer so it runs after the browser's default click-based caret placement.
+  requestAnimationFrame(() => {
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
+  });
+}
+
+function onTermBadgeFocus(e) {
+  markTermInteraction();
+  placeCaretAtEnd(e.target);
+}
+function onTermBadgeClick(e) {
+  // Re-clicks while already focused — keep caret at the end too.
+  placeCaretAtEnd(e.target);
+}
+function onTermBadgeInput(e) {
+  markTermInteraction();
+  const raw = e.target.value.replace(/\D/g, '');
+  if (raw === '') { e.target.value = ''; return; }
+  let num = parseInt(raw, 10);
+  if (num > maxTermAllowed.value) num = maxTermAllowed.value;
+  e.target.value = String(num);
+  local.value.term = num;
+}
+function onTermBadgeBlur(e) {
+  let num = parseInt(e.target.value, 10);
+  if (isNaN(num)) num = local.value.term;
+  if (num < minTerm) num = minTerm;
+  if (num > maxTermAllowed.value) num = maxTermAllowed.value;
+  local.value.term = num;
+  e.target.value = String(num);
+  markTermTouched();
+}
 
 // ── DOM refs ─────────────────────────────────────
 const sumAssuredInput = ref(null);
@@ -342,7 +469,7 @@ const termSliderStyle = computed(() => {
   const min = minTerm, max = maxTermAllowed.value, val = local.value.term;
   const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
   return {
-    background: `linear-gradient(to right, #47903C 0%, #BBD034 ${pct}%, rgba(25,60,110,0.12) ${pct}%, rgba(25,60,110,0.07) 100%)`,
+    background: `linear-gradient(to right, #5C8E2F 0%, #A1C95A ${pct}%, rgba(255,255,255,0.22) ${pct}%, rgba(255,255,255,0.14) 100%)`,
   };
 });
 
@@ -350,7 +477,7 @@ const annuityTermSliderStyle = computed(() => {
   const min = 1, max = 50, val = local.value.annuityTerm || 1;
   const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
   return {
-    background: `linear-gradient(to right, #47903C 0%, #BBD034 ${pct}%, rgba(25,60,110,0.12) ${pct}%, rgba(25,60,110,0.07) 100%)`,
+    background: `linear-gradient(to right, #5C8E2F 0%, #A1C95A ${pct}%, rgba(255,255,255,0.22) ${pct}%, rgba(255,255,255,0.14) 100%)`,
   };
 });
 
@@ -358,7 +485,7 @@ const guaranteedPeriodSliderStyle = computed(() => {
   const min = 0, max = local.value.annuityTerm || 1, val = local.value.guaranteedPeriod || 0;
   const pct = max > 0 ? (val / max) * 100 : 0;
   return {
-    background: `linear-gradient(to right, #47903C 0%, #BBD034 ${pct}%, rgba(25,60,110,0.12) ${pct}%, rgba(25,60,110,0.07) 100%)`,
+    background: `linear-gradient(to right, #5C8E2F 0%, #A1C95A ${pct}%, rgba(255,255,255,0.22) ${pct}%, rgba(255,255,255,0.14) 100%)`,
   };
 });
 </script>
@@ -405,6 +532,22 @@ const guaranteedPeriodSliderStyle = computed(() => {
   flex: 0.85 1 140px;
 }
 
+.two-col-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+.two-col-row .label-row {
+  min-height: 30px;
+  display: flex;
+  align-items: flex-end;
+}
+.two-col-item {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label {
   font-size: 12px; font-weight: 600;
@@ -413,6 +556,8 @@ const guaranteedPeriodSliderStyle = computed(() => {
 }
 .label-row {
   display: flex; align-items: center; gap: 5px;
+  flex-wrap: wrap;
+  row-gap: 4px;
 }
 
 .cw-refresh-label {
@@ -420,7 +565,7 @@ const guaranteedPeriodSliderStyle = computed(() => {
   cursor: pointer; font-size: 14px; padding: 0 2px;
   transition: color 0.2s;
 }
-.cw-refresh-label:hover { color: #BBD034; }
+.cw-refresh-label:hover { color: #A1C95A; }
 .cw-refresh-label:disabled { opacity: 0.3; cursor: not-allowed; }
 @keyframes cw-spin-anim { to { transform: rotate(360deg); } }
 .cw-spin { display: inline-block; animation: cw-spin-anim 0.8s linear infinite; }
@@ -436,14 +581,69 @@ const guaranteedPeriodSliderStyle = computed(() => {
   color: var(--text-main);
   outline: none;
   transition: border-color 0.2s ease;
-  height: 40px;
+  height: 42px;
   box-sizing: border-box;
   font-family: inherit;
 }
 .neu-input:focus { border-color: var(--accent); box-shadow: var(--shadow-btn-press); }
+.neu-input.hint-mode {
+  color: rgba(255,255,255,0.55);
+  -webkit-text-fill-color: rgba(255,255,255,0.55);
+  font-style: italic;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  animation: hintShift 1.6s ease-in-out infinite;
+}
+@keyframes hintShift {
+  0%, 100% {
+    padding-left: 13px;
+    color: rgba(255,255,255,0.55);
+    -webkit-text-fill-color: rgba(255,255,255,0.55);
+  }
+  50% {
+    padding-left: 22px;
+    color: rgba(255,255,255,0.85);
+    -webkit-text-fill-color: rgba(255,255,255,0.85);
+  }
+}
 select#frequency.placeholder-shown { font-weight: 400; font-size: 12px; }
 select#frequency:not(.placeholder-shown) { font-weight: 600; font-size: 14px; }
 select#annuityFrequency { font-size: 14px; font-weight: 600; }
+
+/* ── Brand-green selects (frequency / mode / currency) ─── */
+select.select-green {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>"),
+    linear-gradient(135deg, #A1C95A 0%, #5C8E2F 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: right 14px center, center;
+  background-size: 12px 8px, auto;
+  color: #FFFFFF;
+  font-weight: 700;
+  border: none;
+  padding-right: 36px;
+  cursor: pointer;
+}
+select.select-green:focus {
+  border: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+}
+select.select-green.placeholder-shown {
+  color: rgba(255,255,255,0.85);
+}
+select.select-green option {
+  background: #FFFFFF;
+  color: #1A2E3F;
+  font-weight: 600;
+}
+select.select-green option:disabled {
+  color: rgba(26,46,63,0.4);
+}
 
 input[type="date"].neu-input {
   font-size: 14px; font-weight: 600;
@@ -466,7 +666,7 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   background: var(--surface);
   box-shadow: var(--shadow-in);
   transition: border-color 0.2s ease;
-  height: 40px;
+  height: 42px;
   box-sizing: border-box;
 }
 .input-wrap:focus-within { border-color: var(--accent); box-shadow: var(--shadow-btn-press); }
@@ -503,7 +703,7 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   height: 42px;
 }
 .radio-pill input:checked + span {
-  background: linear-gradient(135deg, #BBD034, #47903C);
+  background: linear-gradient(135deg, #A1C95A, #5C8E2F);
   color: white; border: none;
 }
 .pill-faded span { opacity: 0.45; }
@@ -511,12 +711,89 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 /* ── Term slider ─────────────────────── */
 .term-header { display: flex; align-items: center; justify-content: space-between; padding-right: 4px; }
 .term-badge {
-  background: linear-gradient(135deg, #BBD034, #47903C);
-  color: white; font-size: 14px; font-weight: 800;
-  padding: 3px 14px; border-radius: 20px;
-  margin-right: 2px;
+  background: var(--surface, #294A69);
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color, rgba(95,189,245,0.30));
+  height: 42px;
+  min-width: 110px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'SF Mono', 'Menlo', monospace;
 }
-.term-slider { margin-top: 10px; width: 100%; }
+.term-badge:focus-within {
+  border-color: var(--accent, #79B740);
+}
+.term-badge-input {
+  all: unset;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  -webkit-text-fill-color: #FFFFFF;
+  text-align: right;
+  cursor: text;
+  caret-color: #FFFFFF;
+  min-width: 1ch;
+  box-sizing: content-box;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+.term-badge-input:focus {
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
+.term-badge-input::selection {
+  background: rgba(95,189,245,0.30);
+  color: #FFFFFF;
+}
+.term-badge-input::placeholder {
+  color: rgba(255,255,255,0.40);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  -webkit-text-fill-color: rgba(255,255,255,0.40);
+}
+.term-badge-input::-moz-placeholder { color: rgba(255,255,255,0.40); opacity: 1; }
+.term-badge-input::-webkit-outer-spin-button,
+.term-badge-input::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.term-badge-word {
+  color: rgba(255,255,255,0.70);
+  font-weight: 600;
+  font-size: 14px;
+}
+.term-slider {
+  margin-top: 12px;
+  width: 100%;
+  height: 8px;
+  border-radius: 6px;
+}
+.term-slider::-webkit-slider-thumb {
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #DCEEFF 100%);
+  border: 3px solid #A1C95A;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+.term-slider::-moz-range-thumb {
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #DCEEFF 100%);
+  border: 3px solid #A1C95A;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+.term-slider::-webkit-slider-thumb:hover,
+.term-slider::-moz-range-thumb:hover {
+  border-color: #79B740;
+  transform: scale(1.1);
+}
 
 /* ── Hints ───────────────────────────── */
 .hint { font-size: 12px; color: var(--text-light); }
@@ -529,14 +806,14 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   padding: 11px 15px;
   border-radius: 12px;
   cursor: pointer;
-  border: 1px solid rgba(66,165,245,0.22);
-  background: rgba(66,165,245,0.07);
+  border: 1px solid rgba(74,114,149,0.22);
+  background: rgba(74,114,149,0.07);
   transition: background 0.2s ease, border-color 0.2s ease;
   user-select: none;
 }
 .annuity-toggle-label:hover {
-  background: rgba(66,165,245,0.12);
-  border-color: rgba(66,165,245,0.4);
+  background: rgba(74,114,149,0.12);
+  border-color: rgba(74,114,149,0.4);
 }
 .toggle-icon-wrap { position: relative; width: 18px; height: 18px; flex-shrink: 0; }
 .annuity-chk { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -549,7 +826,7 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   position: relative;
 }
 .annuity-chk:checked ~ .custom-chk {
-  background: linear-gradient(135deg, #BBD034, #47903C);
+  background: linear-gradient(135deg, #A1C95A, #5C8E2F);
 }
 .annuity-chk:checked ~ .custom-chk::after {
   content: '✓';
@@ -559,17 +836,126 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 }
 .toggle-text {
   font-size: 13px; font-weight: 700;
-  color: #42A5F5;
+  color: #5FBDF5;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   flex: 1;
 }
-.toggle-arrow { font-size: 10px; color: #7FB3D3; }
+.toggle-arrow { font-size: 10px; color: #5FBDF5; }
 
 .annuity-grid {
   margin-top: 12px; padding: 12px; border-radius: 12px;
   border: 1px solid var(--border-color);
   background: var(--surface); box-shadow: var(--shadow-in);
+}
+
+/* ── Attention prompt: highlight the next required field ── */
+.attention-next .neu-input,
+.attention-next .input-wrap {
+  border-color: #A1C95A;
+  border-radius: 10px;
+  animation: attentionPulse 1.6s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(161,201,90,0.55);
+}
+.attention-next .input-wrap .neu-input {
+  border-color: #A1C95A;
+  animation: none;
+  box-shadow: none;
+}
+.attention-next .radio-group {
+  border-radius: 12px;
+  animation: attentionPulseOutline 1.6s ease-in-out infinite;
+}
+.attention-next .term-slider {
+  border-radius: 6px;
+  animation: attentionPulseOutline 1.6s ease-in-out infinite;
+}
+.attention-next .term-badge {
+  animation: termBadgePop 1.6s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes termBadgePop {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(161,201,90,0.55);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(161,201,90,0);
+    transform: scale(1.06);
+  }
+}
+@keyframes attentionPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(161,201,90,0.55);
+    border-color: #A1C95A;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(161,201,90,0);
+    border-color: #79B740;
+  }
+}
+@keyframes attentionPulseOutline {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(161,201,90,0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(161,201,90,0);
+  }
+}
+.next-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #A1C95A, #5C8E2F);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  white-space: nowrap;
+  animation: pillBob 1.6s ease-in-out infinite;
+}
+.next-pill::before {
+  content: '←';
+  font-size: 11px;
+  font-weight: 900;
+}
+@keyframes pillBob {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-3px); }
+}
+
+@media (max-width: 720px) {
+  .next-pill {
+    font-size: 10px;
+    padding: 3px 8px;
+    margin-left: 6px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+}
+@media (max-width: 480px) {
+  .next-pill {
+    margin-left: 4px;
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+}
+@media (min-width: 1121px) {
+  /* On desktop the placeholder + connector arrows already guide the user;
+     hide redundant inline pills inside the form. */
+  .next-pill { display: none; }
+  .attention-next .neu-input,
+  .attention-next .input-wrap,
+  .attention-next .radio-group,
+  .attention-next .term-slider,
+  .attention-next .term-badge {
+    animation: none !important;
+    box-shadow: none !important;
+  }
 }
 
 @media (max-width: 720px) {
@@ -598,10 +984,22 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
     gap: 12px;
   }
 
+  /* Reorder blocks on mobile to match the step sequence:
+     DOB → Gender → Sum/Frequency → Term → (Mode/Currency/USD at the end). */
+  .form-grid > .two-col-row.full-width  { order: 3; }
+  .form-grid > .term-group.full-width   { order: 4; }
+  .form-grid > .three-col-row.full-width { order: 5; }
+
+  /* Level 2 row: 1st item (Mode) takes full width; 2nd + 3rd (Currency + USD)
+     share a row at half-each. */
   .three-col-row {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
     align-items: stretch;
+  }
+  .three-col-row > .three-col-item:first-child {
+    grid-column: 1 / -1;
   }
   .three-col-item,
   .three-col-item--wide,
@@ -613,6 +1011,19 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   .three-col-row .label-row {
     min-height: 0;
     align-items: center;
+  }
+
+  /* Level 3 row: Sum and Frequency each on their own line on mobile. */
+  .two-col-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .two-col-item {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .term-header {
@@ -666,9 +1077,13 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   }
   .input-wrap .neu-input { font-size: 15px; }
   .term-badge {
-    font-size: 11px;
-    padding: 2px 10px;
+    font-size: 15px;
+    padding: 8px 12px;
+    min-width: 96px;
+    height: 38px;
   }
+  .term-badge-input { font-size: 15px; }
+  .term-badge-word { font-size: 13px; }
   .term-header {
     gap: 6px;
     padding-right: 0;

@@ -2,8 +2,20 @@ export default {
   appTitle: 'Pro Life Gold — ӨЖС калькуляторы',
   dataHeader: 'ДЕРЕКТЕР',
   ridersHeader: 'ҚОСЫМША ҚОРҒАНЫС ТҮРЛЕРІ',
+  nextStepRiders: 'Қорғаныстарды таңдаңыз',
   calculating: 'Есептелуде…',
   fillToCalculate: 'Есептеу үшін деректерді толтырыңыз',
+  placeholder: {
+    title: 'Мұнда сіздің есебіңіз пайда болады',
+    subtitle: 'Сақтандыру сомасын, сыйлықақыны және сатып алу кестесін көру үшін сол жақтағы деректерді толтырыңыз.',
+    step1: 'Туған күніңізді көрсетіңіз',
+    step2: 'Жынысыңызды көрсетіңіз',
+    step3: 'Жарна сомасын көрсетіңіз',
+    step4: 'Жарналар жиілігін көрсетіңіз',
+    step5: 'Сақтандыру мерзімін көрсетіңіз',
+    step6: 'Қосымша қорғаныстарды көрсетіңіз',
+    calculate: 'Есептеу',
+  },
 
   form: {
     dob: 'Туған күні',
@@ -19,6 +31,11 @@ export default {
 
     frequency: 'Жарналардың периоды',
     freqPlaceholder: 'Толықтыру жиілігін таңдаңыз',
+    nextStep: 'Периодтылықты таңдаңыз',
+    nextStepDob: 'Туған күніңізді көрсетіңіз',
+    nextStepGender: 'Жынысты таңдаңыз',
+    nextStepTerm: 'Мерзімді таңдаңыз',
+    nextStepAmount: 'Соманы көрсетіңіз',
     freq: {
       annual: 'Жылына бір рет',
       semiannual: 'Жарты жылда бір рет',
@@ -39,7 +56,7 @@ export default {
     modePremiumToSa: 'Жарна → Сақтандыру сомасы',
     modeSaToPremium: 'Сақтандыру сомасы → Жарна',
 
-    currencyToggleLabel: 'Жарна мен нәтижелер валютасы',
+    currencyToggleLabel: 'Есеп валютасы',
     currencyUsd: '$ Доллар (USD)',
     currencyKzt: '₸ Теңге (KZT)',
 

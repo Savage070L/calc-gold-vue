@@ -17,12 +17,12 @@
       >
         <defs>
           <linearGradient id="reserveAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#1976D2" stop-opacity="0.3"/>
-            <stop offset="100%" stop-color="#1976D2" stop-opacity="0.02"/>
+            <stop offset="0%"   stop-color="#2D5171" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#2D5171" stop-opacity="0.02"/>
           </linearGradient>
           <linearGradient id="savingsAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#43A047" stop-opacity="0.22"/>
-            <stop offset="100%" stop-color="#43A047" stop-opacity="0.02"/>
+            <stop offset="0%"   stop-color="#8BC353" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#8BC353" stop-opacity="0.02"/>
           </linearGradient>
         </defs>
 
@@ -30,7 +30,7 @@
         <line
           v-for="(gl, i) in gridLines" :key="'gl'+i"
           :x1="ML" :y1="gl.y" :x2="W - MR" :y2="gl.y"
-          stroke="rgba(25,118,210,0.1)" stroke-width="1"
+          stroke="rgba(45,81,113,0.1)" stroke-width="1"
         />
 
         <!-- Y labels -->
@@ -50,9 +50,9 @@
 
         <!-- Axes -->
         <line :x1="ML" :y1="MT" :x2="ML" :y2="MT+IH"
-          stroke="rgba(25,118,210,0.2)" stroke-width="1"/>
+          stroke="rgba(45,81,113,0.2)" stroke-width="1"/>
         <line :x1="ML" :y1="MT+IH" :x2="W-MR" :y2="MT+IH"
-          stroke="rgba(25,118,210,0.2)" stroke-width="1"/>
+          stroke="rgba(45,81,113,0.2)" stroke-width="1"/>
 
         <!-- Area fills (straight segments) -->
         <path :d="savingsAreaPath" fill="url(#savingsAreaGrad)"/>
@@ -62,7 +62,7 @@
         <polyline
           :points="savingsPolyline"
           fill="none"
-          stroke="#43A047"
+          stroke="#8BC353"
           stroke-width="2"
           stroke-dasharray="7,4"
           opacity="0.85"
@@ -72,7 +72,7 @@
         <polyline
           :points="reservePolyline"
           fill="none"
-          stroke="#1976D2"
+          stroke="#2D5171"
           stroke-width="2.5"
         />
 
@@ -89,12 +89,12 @@
           <!-- Dot on reserve line -->
           <circle
             :cx="tooltip.x" :cy="tooltip.reserveY"
-            r="5" fill="#1976D2" stroke="white" stroke-width="2"
+            r="5" fill="#2D5171" stroke="white" stroke-width="2"
           />
           <!-- Dot on savings line -->
           <circle
             :cx="tooltip.x" :cy="tooltip.savingsY"
-            r="4" fill="#43A047" stroke="white" stroke-width="2"
+            r="4" fill="#8BC353" stroke="white" stroke-width="2"
           />
 
           <!-- Tooltip box -->
@@ -104,17 +104,17 @@
               fill="#0B1F35" opacity="0.93"
             />
             <!-- Year / Date header -->
-            <text x="10" y="18" fill="#90CAF9" font-size="12" font-weight="700">
+            <text x="10" y="18" fill="#A8BDD3" font-size="12" font-weight="700">
               Год {{ tooltip.year }} ({{ tooltip.date }})
             </text>
             <!-- Reserve row -->
-            <circle cx="14" cy="31" r="4" fill="#1976D2"/>
+            <circle cx="14" cy="31" r="4" fill="#2D5171"/>
             <text x="24" y="35" fill="#B3D9FF" font-size="11">
               Страх. резерв: {{ tooltip.reserveVal }}
             </text>
             <!-- Savings row -->
-            <circle cx="14" cy="49" r="4" fill="#43A047"/>
-            <text x="24" y="53" fill="#A5D6A7" font-size="11">
+            <circle cx="14" cy="49" r="4" fill="#8BC353"/>
+            <text x="24" y="53" fill="#C0DDA3" font-size="11">
               Простые нак.: {{ tooltip.savingsVal }}
             </text>
           </g>
@@ -330,8 +330,8 @@ h3 .icon {
 
 .chart-wrap {
   border-radius: 12px; overflow: hidden;
-  background: linear-gradient(135deg, rgba(25,118,210,0.03) 0%, rgba(255,255,255,0.7) 100%);
-  border: 1px solid var(--border-color, rgba(25,118,210,0.12));
+  background: linear-gradient(135deg, rgba(45,81,113,0.03) 0%, rgba(255,255,255,0.7) 100%);
+  border: 1px solid var(--border-color, rgba(45,81,113,0.12));
   user-select: none;
 }
 .chart-svg { display: block; cursor: crosshair; }
@@ -347,10 +347,10 @@ h3 .icon {
 .legend-line {
   display: inline-block; width: 28px; height: 3px; border-radius: 2px;
 }
-.blue-solid { background: #1976D2; }
+.blue-solid { background: #2D5171; }
 .green-dashed {
   background: repeating-linear-gradient(
-    to right, #43A047 0, #43A047 6px, transparent 6px, transparent 10px
+    to right, #8BC353 0, #8BC353 6px, transparent 6px, transparent 10px
   );
 }
 </style>

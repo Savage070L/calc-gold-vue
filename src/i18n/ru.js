@@ -2,8 +2,20 @@ export default {
   appTitle: 'Pro Life Gold — Калькулятор НСЖ',
   dataHeader: 'ДАННЫЕ',
   ridersHeader: 'ДОПОЛНИТЕЛЬНЫЕ ПОКРЫТИЯ',
+  nextStepRiders: 'Выберите покрытия',
   calculating: 'Рассчитываем…',
   fillToCalculate: 'Заполните данные для расчёта',
+  placeholder: {
+    title: 'Здесь появится ваш расчёт',
+    subtitle: 'Заполните данные слева, чтобы увидеть страховую сумму, премию и таблицу выкупных сумм.',
+    step1: 'Укажите вашу дату рождения',
+    step2: 'Укажите ваш пол',
+    step3: 'Укажите сумму взноса',
+    step4: 'Укажите периодичность взносов',
+    step5: 'Укажите срок страхования',
+    step6: 'Укажите дополнительные покрытия',
+    calculate: 'Рассчитать',
+  },
 
   form: {
     dob: 'Дата рождения',
@@ -19,6 +31,11 @@ export default {
 
     frequency: 'Периодичность взносов',
     freqPlaceholder: 'Выберите частоту пополнения',
+    nextStep: 'Выберите периодичность',
+    nextStepDob: 'Укажите дату рождения',
+    nextStepGender: 'Выберите пол',
+    nextStepTerm: 'Выберите срок',
+    nextStepAmount: 'Укажите сумму',
     freq: {
       annual: 'Раз в год',
       semiannual: 'Раз в полгода',
@@ -39,7 +56,7 @@ export default {
     modePremiumToSa: 'Взнос → Страховая сумма',
     modeSaToPremium: 'Страховая сумма → Взнос',
 
-    currencyToggleLabel: 'Валюта взносов и результатов',
+    currencyToggleLabel: 'Валюта расчёта',
     currencyUsd: '$ Доллар (USD)',
     currencyKzt: '₸ Тенге (KZT)',
 
@@ -68,7 +85,7 @@ export default {
   },
 
   results: {
-    sectionHeader: 'РЕЗУЛЬТАТ РАСЧЁТА',
+    sectionHeader: 'РЕЗУЛЬТАТЫ РАСЧЕТОВ',
     sumAssured: 'СТРАХОВАЯ СУММА',
     annuity: 'АННУИТЕТНЫЕ ВЫПЛАТЫ',
     totalPremium: 'ИТОГО ПРЕМИЯ',

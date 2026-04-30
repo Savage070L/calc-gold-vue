@@ -1,9 +1,14 @@
 <template>
   <div class="results-summary" v-if="result">
     <div class="result-section-header" aria-hidden="true">
-      <span class="rsh-line"></span>
-      <span class="rsh-text">{{ t('results.sectionHeader') }}</span>
-      <span class="rsh-line"></span>
+      <span class="rsh-icon-wrap">
+        <span class="rsh-icon">📊</span>
+      </span>
+      <div class="rsh-content">
+        <span class="rsh-arrow rsh-arrow-left">▼</span>
+        <span class="rsh-text">{{ t('results.sectionHeader') }}</span>
+        <span class="rsh-arrow rsh-arrow-right">▼</span>
+      </div>
     </div>
 
     <div class="top-badges" :class="{ 'has-annuity': result.annuityPayment > 0 }">
@@ -46,30 +51,6 @@
           <span class="total-sum">{{ fmtRiderSum(row.key, animatedRiders[row.key]?.sum ?? row.sum) }}</span>
           <span class="total-value">{{ fmtP(animatedRiders[row.key]?.premium ?? row.premium) }}</span>
         </div>
-
-        <div v-if="result.annuityPayment > 0" class="detail-summary-card annuity-card">
-          <div class="dsc-left">
-            <span class="dsc-title">{{ t('results.annuityCard') }}</span>
-            <span class="dsc-sub">{{ t('results.annuityCardSub', { term: annuityTermText, gp: guaranteedPeriodText, freq: annuityFreqLabel }) }}</span>
-          </div>
-          <span class="dsc-value">{{ fmtP(animated.annuityPayment) }}</span>
-        </div>
-
-        <div class="detail-summary-card sa-card">
-          <div class="dsc-left">
-            <span class="dsc-title">{{ t('results.saCard') }}</span>
-            <span class="dsc-sub">{{ saDescription }}</span>
-          </div>
-          <span class="dsc-value">{{ fmtP(animated.sumAssured) }}</span>
-        </div>
-
-        <div class="detail-summary-card premium-card">
-          <div class="dsc-left">
-            <span class="dsc-title">{{ t('results.premiumCard') }}</span>
-            <span class="dsc-sub">{{ t('results.premiumCardSub', { term: termText, freq: premiumFreqLabel }) }}</span>
-          </div>
-          <span class="dsc-value">{{ fmtP(animated.totalPremium) }}</span>
-        </div>
       </div>
     </div>
   </div>
@@ -88,7 +69,6 @@ const showDetails = ref(true);
 const isMobile = ref(false);
 onMounted(() => {
   isMobile.value = window.innerWidth <= 720;
-  if (isMobile.value) showDetails.value = false;
 });
 
 const { usdRate, currencyMode, toUsdStr } = useCurrencyRate();
@@ -194,26 +174,107 @@ watch(() => props.result, (r) => {
 
 /* Section header — shown only when columns stack (≤1120px) */
 .result-section-header { display: none; }
+
 @media (max-width: 1120px) {
   .result-section-header {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 2px 0 4px;
+    justify-content: center;
+    padding: 32px 96px;
+    background: linear-gradient(125deg, #2D5171 0%, #1B344E 55%, #0F1F33 100%);
+    border-radius: 20px;
+    margin: 12px 0;
+    overflow: hidden;
+    animation: rshSlide 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
-  .rsh-line {
+
+  .rsh-icon-wrap {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    width: 54px; height: 54px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #A1C95A 0%, #5C8E2F 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(121,183,64,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.30);
+    animation: rshIconPulse 2.4s ease-in-out infinite;
+  }
+  .rsh-icon {
+    font-size: 26px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+  }
+  .rsh-content {
+    position: relative;
+    z-index: 1;
     flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(25,118,210,0.25), rgba(25,118,210,0.25), transparent);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-width: 0;
   }
   .rsh-text {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--primary, #1976D2);
-    white-space: nowrap;
+    color: #FFFFFF;
+    line-height: 1.15;
+    text-align: center;
   }
+  .rsh-arrow {
+    font-size: 13px;
+    color: #A1C95A;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+}
+@keyframes rshSlide {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes rshIconPulse {
+  0%, 100% { box-shadow: 0 6px 20px rgba(121,183,64,0.45), inset 0 1px 0 rgba(255,255,255,0.30); }
+  50%      { box-shadow: 0 8px 28px rgba(121,183,64,0.65), inset 0 1px 0 rgba(255,255,255,0.40); }
+}
+
+@media (max-width: 480px) {
+  .result-section-header {
+    padding: 20px 56px;
+    border-radius: 16px;
+  }
+  .rsh-icon-wrap {
+    left: 12px;
+    width: 40px; height: 40px;
+    border-radius: 11px;
+  }
+  .rsh-icon { font-size: 20px; }
+  .rsh-content { gap: 6px; }
+  .rsh-text {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+  .rsh-arrow {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .result-section-header {
+    padding: 18px 50px;
+  }
+  .rsh-content { gap: 4px; }
+  .rsh-text { font-size: 11px; letter-spacing: 0.05em; }
+  .rsh-arrow { font-size: 9px; }
 }
 
 @keyframes fadeInCard {
@@ -245,10 +306,8 @@ watch(() => props.result, (r) => {
 }
 
 .badge-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  position: relative;
+  display: block;
   font-size: 15px;
   font-weight: 800;
   color: var(--text-light);
@@ -256,6 +315,14 @@ watch(() => props.result, (r) => {
   letter-spacing: 0.08em;
   white-space: nowrap;
   max-width: 100%;
+  text-align: center;
+  padding: 0 22px;
+}
+.badge-label :deep(.info-wrap) {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .badge-value {
@@ -272,19 +339,19 @@ watch(() => props.result, (r) => {
 
 /* ── Badge color themes ───────────────── */
 .badge-sa {
-  background: linear-gradient(to right, #BBD034, #47903C);
+  background: linear-gradient(to right, #A1C95A, #5C8E2F);
 }
 .badge-sa .badge-label,
 .badge-sa .badge-value { color: #fff; -webkit-text-fill-color: #fff; }
 
 .badge-annuity {
-  background: linear-gradient(to right, #294A69, #293C53);
+  background: linear-gradient(135deg, #5C82A4, #2D5171);
 }
 .badge-annuity .badge-label,
 .badge-annuity .badge-value { color: #fff; -webkit-text-fill-color: #fff; }
 
 .badge-premium {
-  background: linear-gradient(to right, #456E94, #2D5171);
+  background: linear-gradient(to right, #A1C95A, #5C8E2F);
 }
 .badge-premium .badge-label,
 .badge-premium .badge-value { color: #fff; -webkit-text-fill-color: #fff; }
@@ -325,7 +392,7 @@ watch(() => props.result, (r) => {
 .total-block {
   background: var(--surface, #F5F8FF);
   color: #1B2838;
-  border: 2px solid rgba(25,118,210,0.40);
+  border: 2px solid #2D5171;
   border-radius: var(--radius, 20px);
   padding: 20px;
   animation: fadeInCard 0.55s ease-out both;
@@ -347,7 +414,7 @@ watch(() => props.result, (r) => {
 .total-block h3 .icon {
   width: 32px; height: 32px;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 50%; background: rgba(66,165,245,0.12);
+  border-radius: 50%; background: rgba(74,114,149,0.12);
 }
 
 .total-header-row, .total-row {
@@ -377,18 +444,18 @@ watch(() => props.result, (r) => {
 .total-sum {
   font-family: 'SF Mono', monospace;
   font-size: 18px; font-weight: 700;
-  text-align: center; color: #2E7D32;
+  text-align: center; color: #3F6620;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .total-value {
   font-family: 'SF Mono', monospace;
   font-size: 18px; font-weight: 700;
-  text-align: center; color: #1565C0;
+  text-align: center; color: #294A69;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .total-value.big {
   font-size: 32px; text-align: right;
-  background: linear-gradient(135deg, #42A5F5, #66BB6A);
+  background: linear-gradient(135deg, #4A7295, #9CC868);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   display: block; white-space: nowrap; line-height: 1.1;
 }
@@ -426,7 +493,7 @@ watch(() => props.result, (r) => {
 .annuity-val {
   font-family: 'SF Mono', monospace;
   font-size: 32px; font-weight: 800;
-  background: linear-gradient(135deg, #43A047, #66BB6A, #A5D6A7);
+  background: linear-gradient(135deg, #8BC353, #9CC868, #C0DDA3);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
@@ -449,20 +516,20 @@ watch(() => props.result, (r) => {
   flex-shrink: 0;
 }
 .dsc-value.blue {
-  background: linear-gradient(135deg, #1565C0, #42A5F5);
+  background: linear-gradient(135deg, #294A69, #4A7295);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .dsc-value.green {
-  background: linear-gradient(135deg, #2E7D32, #66BB6A);
+  background: linear-gradient(135deg, #79B740, #9CC868);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 /* Страховая сумма — зелёный */
 .sa-card {
-  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  background: linear-gradient(135deg, #EEF6E0, #C7E0A6);
 }
-.sa-card .dsc-title { color: #1B5E20; }
+.sa-card .dsc-title { color: #5A8A30; }
 .sa-card .dsc-sub { color: #4E7D52; opacity: 1; }
-.sa-card .dsc-value { color: #1B5E20; -webkit-text-fill-color: #1B5E20; background: none; }
+.sa-card .dsc-value { color: #5A8A30; -webkit-text-fill-color: #5A8A30; background: none; }
 
 /* Аннуитетная выплата — тёмно-синий */
 .annuity-card {
@@ -474,11 +541,11 @@ watch(() => props.result, (r) => {
 
 /* Итого премия — синий */
 .premium-card {
-  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  background: linear-gradient(135deg, #E5ECF3, #BCC9D9);
 }
-.premium-card .dsc-title { color: #0D47A1; }
+.premium-card .dsc-title { color: #1F3A55; }
 .premium-card .dsc-sub { color: #546E8A; opacity: 1; }
-.premium-card .dsc-value { color: #0D47A1; -webkit-text-fill-color: #0D47A1; background: none; }
+.premium-card .dsc-value { color: #1F3A55; -webkit-text-fill-color: #1F3A55; background: none; }
 
 @media (max-width: 860px) {
   .top-badges, .top-badges.has-annuity {

@@ -28,7 +28,7 @@
           <span class="rider-hint">{{ t('riders.chooseSum') }}</span>
           <InfoTooltip v-bind="tip('trauma')" />
         </span>
-        <select v-model.number="local.trauma.sum">
+        <select v-model.number="local.trauma.sum" class="select-green">
           <option :value="500000">500 000 ₸</option>
           <option :value="1000000">1 000 000 ₸</option>
           <option :value="1500000">1 500 000 ₸</option>
@@ -48,7 +48,7 @@
           <span class="rider-hint">{{ t('riders.chooseSum') }}</span>
           <InfoTooltip v-bind="tip('hospitalization')" />
         </span>
-        <select v-model.number="local.hospitalization.sum">
+        <select v-model.number="local.hospitalization.sum" class="select-green">
           <option :value="500000">500 000 ₸</option>
           <option :value="1000000">1 000 000 ₸</option>
           <option :value="2000000">2 000 000 ₸</option>
@@ -84,10 +84,10 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
 .rider-group-label {
   font-size: 15px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.8px;
-  color: var(--accent, #47903C);
+  color: var(--rider-group, var(--text-light, #5FBDF5));
   margin: 10px 0 5px;
   padding-bottom: 5px;
-  border-bottom: 1px solid var(--border-color, rgba(66,165,245,0.2));
+  border-bottom: 1px solid rgba(95,189,245,0.25);
 }
 
 .rider-check-row {
@@ -113,7 +113,7 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
   position: relative;
 }
 .rider-chk:checked ~ .rider-chk-box {
-  background: linear-gradient(135deg, #BBD034, #47903C);
+  background: linear-gradient(135deg, #A1C95A, #5C8E2F);
 }
 .rider-chk:checked ~ .rider-chk-box::after {
   content: '✓';
@@ -140,16 +140,44 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
 
 .rider-row-content select {
   flex-shrink: 0; width: 160px; padding: 8px 12px;
-  border: 1px solid var(--border-color, rgba(66,165,245,0.2));
+  border: 1px solid var(--border-color, rgba(74,114,149,0.2));
   border-radius: 8px; font-size: 16px;
-  background: var(--surface, #1E3A5A);
+  background: var(--surface, #294A69);
   box-shadow: var(--shadow-in);
   color: var(--text-main, #E8F4FD);
   outline: none;
   font-family: 'SF Mono', 'Menlo', monospace; font-weight: 600;
   cursor: pointer;
 }
-.rider-row-content select:focus { border-color: var(--accent, #47903C); }
+.rider-row-content select:focus { border-color: var(--accent, #5C8E2F); }
+
+/* ── Brand-green select (trauma / hospitalization sum) ── */
+.rider-row-content select.select-green {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>"),
+    linear-gradient(135deg, #A1C95A 0%, #5C8E2F 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: right 12px center, center;
+  background-size: 12px 8px, auto;
+  color: #FFFFFF;
+  font-weight: 700;
+  border: none;
+  padding-right: 32px;
+  box-shadow: none;
+}
+.rider-row-content select.select-green:focus {
+  border: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+}
+.rider-row-content select.select-green option {
+  background: #FFFFFF;
+  color: #1A2E3F;
+  font-weight: 600;
+}
 
 .rider-name :deep(.info-btn) {
   border-color: rgba(255,255,255,0.5);
@@ -159,12 +187,12 @@ watch(local, (val) => emit('update:modelValue', { ...val }), { deep: true });
 .rider-name :deep(.info-btn.active) {
   background: rgba(255,255,255,0.9);
   border-color: white;
-  color: #1565C0;
+  color: #294A69;
 }
 .rider-legend {
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1px solid var(--border-color, rgba(66,165,245,0.2));
+  border-top: 1px solid var(--border-color, rgba(74,114,149,0.2));
   font-size: 14px;
   font-weight: 600;
   color: var(--text-light, #7FB3D3);

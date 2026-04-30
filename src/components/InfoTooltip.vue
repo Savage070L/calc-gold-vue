@@ -76,9 +76,9 @@ const popupStyle = computed(() => ({
 .info-btn {
   width: 17px; height: 17px;
   border-radius: 50%;
-  border: 1.5px solid #1976D2;
+  border: 1.5px solid #2D5171;
   background: transparent;
-  color: #1976D2;
+  color: #2D5171;
   font-size: 10px; font-weight: 700;
   font-family: Georgia, 'Times New Roman', serif;
   font-style: italic;
@@ -91,7 +91,7 @@ const popupStyle = computed(() => ({
 }
 .info-btn:hover, .info-btn.active {
   opacity: 1;
-  background: #1976D2;
+  background: #2D5171;
   color: white;
   transform: scale(1.1);
 }
@@ -108,7 +108,7 @@ const popupStyle = computed(() => ({
   position: fixed;
   z-index: 9999;
   background: #ffffff;
-  border: 1px solid rgba(25,118,210,0.18);
+  border: 1px solid rgba(45,81,113,0.18);
   border-radius: 14px;
   width: 320px;
   overflow: hidden;
@@ -122,7 +122,7 @@ const popupStyle = computed(() => ({
 .popup-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 14px 10px;
-  background: linear-gradient(135deg, #1565C0, #1976D2);
+  background: linear-gradient(135deg, #294A69, #2D5171);
   gap: 8px;
 }
 .popup-title-text {
@@ -149,6 +149,6 @@ const popupStyle = computed(() => ({
   font-size: 13px; line-height: 1.6;
   color: #1A2E3F;
 }
-.popup-body b { font-weight: 700; color: #0D47A1; }
+.popup-body b { font-weight: 700; color: #1F3A55; }
 .popup-body br + br { display: block; margin-top: 6px; }
 </style>

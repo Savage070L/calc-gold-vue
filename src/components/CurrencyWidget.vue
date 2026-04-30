@@ -70,9 +70,23 @@ function onBlur() {
 }
 
 function onInput(e) {
-  const raw = e.target.value;
+  let raw = e.target.value;
+  // Strip everything but digits and decimal separators; normalize comma → dot.
+  raw = raw.replace(/[^\d.,]/g, '').replace(',', '.');
+  // Keep only the first dot.
+  const firstDot = raw.indexOf('.');
+  if (firstDot !== -1) {
+    raw = raw.slice(0, firstDot + 1) + raw.slice(firstDot + 1).replace(/\./g, '');
+  }
+  // Limit to 2 digits after the decimal point.
+  if (firstDot !== -1) {
+    const [intPart, decPart = ''] = raw.split('.');
+    raw = intPart + '.' + decPart.slice(0, 2);
+  }
+  // Reflect the cleaned value back into the DOM input if it diverged.
+  if (e.target.value !== raw) e.target.value = raw;
   inputVal.value = raw;
-  const num = parseFloat(String(raw).replace(',', '.'));
+  const num = parseFloat(raw);
   if (!isNaN(num) && num > 0) {
     usdRate.value  = num;
     isManual.value = true;
@@ -133,17 +147,20 @@ onMounted(fetchRate);
 .cw-wrap {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 0;
   padding: 10px 10px 10px 13px;
-  border: 1px solid rgba(66, 165, 245, 0.18);
+  border: 1px solid var(--border-color, rgba(95,189,245,0.30));
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface, #294A69);
   transition: border-color 0.2s ease;
-  height: 40px;
+  height: 42px;
   box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .cw-wrap:focus-within {
-  border-color: #42A5F5;
+  border-color: #4A7295;
 }
 .cw--manual {
   border-color: rgba(255, 183, 77, 0.35);
@@ -152,7 +169,8 @@ onMounted(fetchRate);
 /* ── Input — bare, no border ── */
 .cw-input {
   flex: 0 0 auto;
-  width: 64px;
+  width: 54px;
+  min-width: 0;
   padding: 0;
   border: none;
   background: transparent;
@@ -172,12 +190,15 @@ onMounted(fetchRate);
   display: flex;
   align-items: center;
   gap: 4px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
 }
 .cw-suffix-symbol {
   font-size: 14px;
   font-weight: 600;
   color: #E7F4FD;
+  flex-shrink: 0;
 }
 .cw-suffix-meta {
   font-size: 8px;
@@ -185,6 +206,10 @@ onMounted(fetchRate);
   color: rgba(255, 255, 255, 0.3);
   white-space: nowrap;
   letter-spacing: 0.02em;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cw-suffix-meta--manual {
   color: rgba(255, 183, 77, 0.55);
@@ -208,8 +233,8 @@ onMounted(fetchRate);
   transition: all 0.18s;
 }
 .cw-refresh:hover:not(:disabled) {
-  background: rgba(66, 165, 245, 0.15);
-  color: #90CAF9;
+  background: rgba(74, 114, 149, 0.15);
+  color: #A8BDD3;
 }
 .cw-refresh:disabled {
   opacity: 0.4;

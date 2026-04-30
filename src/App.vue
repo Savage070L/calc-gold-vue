@@ -41,13 +41,13 @@ onBeforeUnmount(() => {
 <style>
 :root {
   /* Blue / Green palette */
-  --primary:         #1976D2;
-  --primary-dark:    #1565C0;
-  --primary-light:   #42A5F5;
-  --primary-pale:    #E3F2FD;
-  --secondary:       #2E7D32;
-  --secondary-light: #43A047;
-  --secondary-pale:  #E8F5E9;
+  --primary:         #2D5171;
+  --primary-dark:    #294A69;
+  --primary-light:   #4A7295;
+  --primary-pale:    #E5ECF3;
+  --secondary:       #79B740;
+  --secondary-light: #8BC353;
+  --secondary-pale:  #EEF6E0;
 
   /* Surfaces */
   --bg:          #FFFFFF;
@@ -59,11 +59,11 @@ onBeforeUnmount(() => {
   /* Text */
   --text-main:   #1A2E3F;
   --text-light:  #5A7A96;
-  --accent:      #1976D2;
-  --accent-hover:#42A5F5;
+  --accent:      #2D5171;
+  --accent-hover:#4A7295;
 
   /* Borders */
-  --border-color: rgba(25,118,210,0.14);
+  --border-color: rgba(45,81,113,0.14);
 
   /* Shadows disabled — flat UI on white background */
   --shadow-out:       none;
@@ -140,14 +140,14 @@ input[type="range"]::-moz-range-thumb {
 .logo-pill {
   display: flex; align-items: center; gap: 7px;
   background: var(--panel-dark-2);
-  border: 1px solid rgba(66,165,245,0.2);
+  border: 1px solid rgba(74,114,149,0.2);
   border-radius: 14px;
   padding: 7px 16px;
 }
 .logo-icon { font-size: 16px; }
 .logo-text {
   font-size: 14px; font-weight: 700;
-  background: linear-gradient(135deg, #90CAF9, #42A5F5);
+  background: linear-gradient(135deg, #A8BDD3, #4A7295);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 0.03em;
@@ -156,7 +156,7 @@ input[type="range"]::-moz-range-thumb {
 .header-center { flex: 1; text-align: center; }
 .app-title {
   font-size: 20px; font-weight: 800; letter-spacing: 0.06em;
-  background: linear-gradient(135deg, #90CAF9 0%, #42A5F5 40%, #1976D2 70%, #43A047 100%);
+  background: linear-gradient(135deg, #A8BDD3 0%, #4A7295 40%, #2D5171 70%, #8BC353 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-wrap: balance;

@@ -1,17 +1,13 @@
 <template>
-  <div class="reserves-table" v-if="result?.reserves?.length">
-
-    <!-- Toggle button -->
-    <button class="toggle-btn" @click="showTable = !showTable">
-      <span class="btn-icon">📋</span>
-      <span>{{ t('table.toggle') }}</span>
+  <div class="reserves-block" v-if="result?.reserves?.length" ref="cardRef">
+    <h3 class="reserves-toggle" @click="showTable = !showTable">
+      <span class="icon">📋</span>
+      <span class="reserves-title">{{ t('table.toggle') }}</span>
       <InfoTooltip v-bind="tip('table')" />
-      <span class="btn-arrow">{{ showTable ? '▲' : '▼' }}</span>
-    </button>
-
-    <!-- Table (collapsible) -->
-    <div v-if="showTable" class="table-card">
-      <div class="table-wrapper">
+      <span class="reserves-arrow">{{ showTable ? '▲' : '▼' }}</span>
+    </h3>
+    <div v-show="showTable" class="reserves-body">
+      <div class="table-wrapper" ref="wrapperRef" :style="wrapperStyle">
         <table class="data-table">
           <colgroup>
             <col class="c-year" />
@@ -37,12 +33,11 @@
         </table>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { formatMoney } from '../composables/useInsuranceCalc.js';
 import { useCurrencyRate } from '../composables/useCurrencyRate.js';
 import InfoTooltip from './InfoTooltip.vue';
@@ -69,6 +64,81 @@ function policyDate(yearNum) {
   return `${d}.${m}.${parseInt(y, 10) + yearNum}`;
 }
 
+// ── Align table bottom with the bottom of the Riders card on the left ──
+const cardRef    = ref(null);
+const wrapperRef = ref(null);
+const maxH       = ref(0);
+
+const wrapperStyle = computed(() => (
+  maxH.value > 0
+    ? { height: maxH.value + 'px', overflowY: 'auto' }
+    : {}
+));
+
+let anchorEl = null;
+let ro = null;
+let rafId = null;
+
+function recompute() {
+  if (typeof window === 'undefined' || window.innerWidth <= 1120) {
+    maxH.value = 0;
+    return;
+  }
+  if (!wrapperRef.value || !anchorEl) return;
+  const wrapRect = wrapperRef.value.getBoundingClientRect();
+  const anchorRect = anchorEl.getBoundingClientRect();
+
+  // Account for any spacing that lives BELOW the table-wrapper but
+  // still above the visual end of the right side (.reserves-block
+  // border + padding, surrounding .results-section bottom-padding, etc.)
+  // so that the right side ends exactly at anchor.bottom, not below it.
+  let bottomBuffer = 0;
+  const block = wrapperRef.value.closest('.reserves-block');
+  if (block) {
+    const bs = getComputedStyle(block);
+    bottomBuffer += (parseFloat(bs.borderBottomWidth) || 0)
+                  + (parseFloat(bs.paddingBottom) || 0);
+  }
+  const section = wrapperRef.value.closest('.results-section');
+  if (section) {
+    const ss = getComputedStyle(section);
+    bottomBuffer += (parseFloat(ss.paddingBottom) || 0)
+                  + (parseFloat(ss.borderBottomWidth) || 0);
+  }
+
+  const avail = Math.max(160, anchorRect.bottom - bottomBuffer - wrapRect.top);
+  maxH.value = avail;
+}
+
+function scheduleRecompute() {
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(recompute);
+}
+
+onMounted(() => {
+  nextTick(() => {
+    // Anchor to the Riders card's bottom — that's the visible end of the left-side content.
+    anchorEl = document.querySelector('.riders-card') || document.querySelector('.left-column');
+    if (!anchorEl) return;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(scheduleRecompute);
+      ro.observe(anchorEl);
+      if (wrapperRef.value) ro.observe(wrapperRef.value);
+    }
+    window.addEventListener('resize', scheduleRecompute);
+    scheduleRecompute();
+  });
+});
+
+onBeforeUnmount(() => {
+  if (ro) ro.disconnect();
+  window.removeEventListener('resize', scheduleRecompute);
+  if (rafId) cancelAnimationFrame(rafId);
+});
+
+watch(showTable, () => nextTick(scheduleRecompute));
+watch(() => props.result, () => nextTick(scheduleRecompute));
+
 function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
 </script>
 
@@ -78,59 +148,57 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Toggle button ─────────────────── */
-.toggle-btn {
-  width: 100%;
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 18px;
+/* ── Reserves block (single card matching "Детализация") ── */
+.reserves-block {
   background: var(--surface, #F5F8FF);
-  border: 2px solid rgba(25,118,210,0.40);
-  border-radius: 16px;
-  font-size: 15px; font-weight: 600;
-  color: var(--text-main, #1A2E3F);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-.toggle-btn:hover {
-  background: var(--primary-pale, #E3F2FD);
-  border-color: var(--primary, #1976D2);
-  color: var(--primary, #1976D2);
-}
-.btn-icon { font-size: 18px; }
-.toggle-btn span:nth-child(2) { flex: 1; }
-.btn-arrow { font-size: 11px; color: var(--text-light, #5A7A96); }
-
-/* ── Table card ────────────────────── */
-.table-card {
-  background: var(--surface, #F5F8FF);
-  border: 2px solid rgba(25,118,210,0.40);
-  border-radius: 16px;
+  color: #1B2838;
+  border: 2px solid #2D5171;
+  border-radius: var(--radius, 20px);
+  padding: 20px;
   animation: slideDown 0.3s ease-out both;
-  overflow: hidden;
-  margin-top: 6px;
 }
+.reserves-toggle {
+  cursor: pointer;
+  user-select: none;
+  margin: 0; padding: 0;
+  font-size: 22px; font-weight: 700;
+  color: #1B2838;
+  display: flex; align-items: center; gap: 8px;
+}
+.reserves-toggle .icon {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(74,114,149,0.12);
+  font-size: 18px;
+}
+.reserves-title { flex: 0 0 auto; }
+.reserves-arrow {
+  margin-left: auto;
+  font-size: 12px;
+  opacity: 0.5;
+}
+.reserves-body { margin-top: 12px; }
 .table-wrapper {
-  overflow-x: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
 }
 
 /* ── Table ─────────────────────────── */
 .data-table {
   width: 100%;
-  min-width: 420px;
   table-layout: fixed;
   border-collapse: collapse;
   font-family: 'SF Mono', 'Menlo', monospace;
 }
 
-.data-table col.c-year      { width: 100px; }
-.data-table col.c-date      { width: 300px; }
-.data-table col.c-surrender { width: auto; }
+.data-table col.c-year      { width: 20%; }
+.data-table col.c-date      { width: 35%; }
+.data-table col.c-surrender { width: 45%; }
 
-/* Header */
+/* Header — sticky so it stays visible while scrolling */
 .data-table thead tr {
-  background: linear-gradient(135deg, #3E6487, #2D5171);
+  background: linear-gradient(135deg, #3D6286, #1B344E);
 }
 .data-table th {
   color: white;
@@ -140,6 +208,10 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
   text-transform: uppercase; letter-spacing: 0.5px;
   white-space: normal;
   border: none;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(135deg, #3D6286, #1B344E);
 }
 
 /* Rows */
@@ -154,7 +226,7 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
   background: rgba(62, 100, 135, 0.06);
 }
 .data-table tbody tr:hover td {
-  background: var(--primary-pale, #E3F2FD);
+  background: var(--primary-pale, #E5ECF3);
 }
 
 .data-table td {
@@ -164,26 +236,26 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
   font-size: 16px; font-weight: 600;
   color: var(--text-main, #1A2E3F);
   border: none;
-  border-right: 1px solid rgba(25, 118, 210, 0.08);
+  border-right: 1px solid rgba(45, 81, 113, 0.08);
 }
 .data-table td:last-child { border-right: none; }
 
 /* Year — bold blue */
 .col-year {
   font-size: 18px; font-weight: 800;
-  color: #1565C0;
+  color: #294A69;
 }
 
 /* Date — same weight/font as others, slightly muted */
 .col-date {
   font-size: 16px; font-weight: 600;
-  color: #3A5A7A;
+  color: #2D5171;
 }
 
 /* Surrender value */
 .col-surrender {
   font-size: 18px; font-weight: 700;
-  color: #1B5E20;
+  color: #3F6620;
 }
 
 /* Info button inside blue header — white style */
@@ -201,27 +273,36 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
 }
 /* Info button in toggle button row */
 .toggle-btn :deep(.info-btn) {
-  border-color: rgba(25,118,210,0.5);
-  color: rgba(25,118,210,0.6);
+  border-color: rgba(45,81,113,0.5);
+  color: rgba(45,81,113,0.6);
 }
 .toggle-btn :deep(.info-btn:hover),
 .toggle-btn :deep(.info-btn.active) {
-  background: #1976D2;
-  border-color: #1976D2;
+  background: #2D5171;
+  border-color: #2D5171;
   color: white;
 }
 
 @media (max-width: 720px) {
   .data-table { min-width: 0; }
 
-  .toggle-btn {
-    padding: 12px;
-    font-size: 14px;
+  .reserves-block { padding: 14px; }
+  .reserves-toggle {
+    font-size: 16px;
+    flex-wrap: wrap;
+    row-gap: 6px;
   }
+  .reserves-toggle .reserves-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word;
+  }
+  .reserves-toggle .icon { width: 26px; height: 26px; font-size: 15px; }
 
-  .data-table col.c-year      { width: 40px; }
-  .data-table col.c-date      { width: 110px; }
-  .data-table col.c-surrender { width: auto; }
+  /* Same proportional widths on mobile — no horizontal scroll */
+  .data-table col.c-year      { width: 20%; }
+  .data-table col.c-date      { width: 35%; }
+  .data-table col.c-surrender { width: 45%; }
 
   .data-table th {
     font-size: 10px;
@@ -239,5 +320,12 @@ function fmt(v) { return formatMoney(v) + '\u00A0₸'; }
   .col-surrender {
     font-size: 13px;
   }
+}
+
+@media (max-width: 480px) {
+  .reserves-block { padding: 12px; }
+  .reserves-toggle { font-size: 14px; gap: 6px; }
+  .reserves-toggle .icon { width: 24px; height: 24px; font-size: 13px; }
+  .reserves-arrow { font-size: 11px; }
 }
 </style>
