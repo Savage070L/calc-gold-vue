@@ -924,11 +924,11 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   font-weight: 900;
 }
 
-/* DOB pill — sits right next to the date input / calendar icon */
+/* DOB pill — sits at the top, next to the "ДАТА РОЖДЕНИЯ" label */
 .dob-group { position: relative; }
 .next-pill--floating {
   position: absolute;
-  bottom: 9px;       /* aligns with input vertical center */
+  top: -3px;          /* aligns vertical-center with the label row */
   left: calc(100% + 4px);
   margin-left: 0;
   white-space: nowrap !important;
@@ -946,6 +946,14 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
     padding: 4px 10px;
     margin-left: 6px;
     line-height: 1.2;
+  }
+  /* DOB date input — more prominent border on mobile */
+  #dob.neu-input {
+    border-width: 2px;
+    border-color: rgba(95,189,245,0.60);
+  }
+  #dob.neu-input:focus {
+    border-color: var(--accent, #79B740);
   }
 }
 @media (max-width: 480px) {
