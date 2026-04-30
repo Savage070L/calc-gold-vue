@@ -965,8 +965,18 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   /* DOB & Gender — more prominent + symmetric borders on mobile */
   #dob.neu-input,
   .radio-pill span {
+    box-sizing: border-box;
+    height: 44px;
     border-width: 2px;
     border-color: rgba(95,189,245,0.60);
+  }
+  /* iOS Safari adds extra padding to native <input type="date">.
+     Strip it so the field matches the radio pill height pixel-for-pixel. */
+  #dob.neu-input {
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 1.2;
+    padding: 0 13px;
   }
   #dob.neu-input:focus {
     border-color: var(--accent, #79B740);
