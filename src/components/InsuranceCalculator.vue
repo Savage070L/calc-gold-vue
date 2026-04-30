@@ -45,11 +45,12 @@
 
       <!-- Riders Card -->
       <div class="riders-card" :class="{ 'attention-next': needsRiders }">
+        <div v-if="needsRiders" class="riders-pill-row">
+          <span class="next-pill">{{ t('nextStepRiders') }}</span>
+        </div>
         <div class="riders-card-header riders-toggle" :class="{ expanded: showRiders }" @click="showRiders = !showRiders">
           <span class="rc-icon">🛡️</span>
-          <span class="riders-header-text">
-            {{ t('ridersHeader') }}<span v-if="needsRiders" class="next-pill">{{ t('nextStepRiders') }}</span>
-          </span>
+          <span class="riders-header-text">{{ t('ridersHeader') }}</span>
           <span class="riders-arrow">{{ showRiders ? '▲' : '▼' }}</span>
         </div>
         <RidersSection v-show="showRiders" v-model="formData.riders" />
@@ -484,6 +485,37 @@ watch(result, (r, prev) => {
 .riders-header-text {
   flex: 1 1 auto;
   min-width: 0;
+}
+.riders-pill-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.riders-pill-row .next-pill {
+  margin-left: 0;
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 999px;
+  animation: pillBobV 1.6s ease-in-out infinite;
+}
+.riders-pill-row .next-pill::before {
+  content: '↓';
+  font-size: 15px;
+  font-weight: 900;
+}
+@keyframes pillBobV {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+@media (max-width: 480px) {
+  .riders-pill-row .next-pill {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+  .riders-pill-row .next-pill::before {
+    font-size: 13px;
+  }
 }
 .riders-card-header.expanded {
   margin-bottom: 8px;

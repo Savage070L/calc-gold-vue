@@ -4,10 +4,9 @@
 
     <div class="form-grid">
       <!-- Дата рождения | Пол -->
-      <div class="form-group" :class="{ 'attention-next': needsDob }">
+      <div class="form-group dob-group" :class="{ 'attention-next': needsDob }">
         <label for="dob" class="label-row">
           {{ t('form.dob') }}
-          <span v-if="needsDob" class="next-pill">{{ t('form.nextStepDob') }}</span>
         </label>
         <input
           id="dob"
@@ -17,6 +16,7 @@
           min="1900-01-01"
           class="neu-input"
         />
+        <span v-if="needsDob" class="next-pill next-pill--floating">{{ t('form.nextStepDob') }}</span>
       </div>
 
       <div class="form-group" :class="{ 'attention-next': needsGender }">
@@ -923,6 +923,18 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   font-size: 11px;
   font-weight: 900;
 }
+
+/* DOB pill — sits to the right of the date input, may overlap the gender column */
+.dob-group { position: relative; }
+.next-pill--floating {
+  position: absolute;
+  bottom: 9px;       /* aligns with input vertical center */
+  left: calc(100% + 8px);
+  margin-left: 0;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
 @keyframes pillBob {
   0%, 100% { transform: translateX(0); }
   50%      { transform: translateX(-3px); }
@@ -980,7 +992,7 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   }
 
   .form-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 

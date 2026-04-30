@@ -199,6 +199,7 @@ onMounted(fetchRate);
   font-weight: 600;
   color: #E7F4FD;
   flex-shrink: 0;
+  margin-left: 18px;
 }
 .cw-suffix-meta {
   font-size: 8px;
