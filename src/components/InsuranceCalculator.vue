@@ -425,7 +425,7 @@ watch(result, (r, prev) => {
   filter: drop-shadow(0 0 8px rgba(161,201,90,0.65));
 }
 .ph-arrow-path {
-  animation: phDashMove 1.2s linear infinite;
+  animation: phDashMove 0.9s linear infinite;
 }
 @keyframes phDashMove {
   to { stroke-dashoffset: -26; }
@@ -493,14 +493,14 @@ watch(result, (r, prev) => {
 }
 .riders-pill-row .next-pill {
   margin-left: 0;
-  padding: 8px 18px;
-  font-size: 13px;
+  padding: 10px 22px;
+  font-size: 16px;
   border-radius: 999px;
-  animation: pillBobV 1.6s ease-in-out infinite;
+  animation: pillBobV 1.1s ease-in-out infinite;
 }
 .riders-pill-row .next-pill::before {
   content: '↓';
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 900;
 }
 @keyframes pillBobV {
@@ -510,11 +510,11 @@ watch(result, (r, prev) => {
 
 @media (max-width: 480px) {
   .riders-pill-row .next-pill {
-    padding: 6px 14px;
-    font-size: 12px;
+    padding: 8px 18px;
+    font-size: 14px;
   }
   .riders-pill-row .next-pill::before {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 .riders-card-header.expanded {
@@ -545,7 +545,7 @@ watch(result, (r, prev) => {
 /* ── Attention prompt: highlight Riders block as the next step ── */
 .riders-card.attention-next {
   border: 2px solid #A1C95A;
-  animation: ridersAttention 1.8s ease-in-out infinite;
+  animation: ridersAttention 1.3s ease-in-out infinite;
 }
 @keyframes ridersAttention {
   0%, 100% {
@@ -575,7 +575,7 @@ watch(result, (r, prev) => {
   letter-spacing: 0.04em;
   text-transform: none;
   white-space: nowrap;
-  animation: pillBob 1.6s ease-in-out infinite;
+  animation: pillBob 1.1s ease-in-out infinite;
 }
 .next-pill::before {
   content: '←';
@@ -604,7 +604,7 @@ watch(result, (r, prev) => {
   cursor: pointer;
   box-shadow: 0 8px 22px rgba(121,183,64,0.45),
               inset 0 1px 0 rgba(255,255,255,0.30);
-  animation: recalcPulse 1.6s ease-in-out infinite;
+  animation: recalcPulse 1.1s ease-in-out infinite;
   transition: transform 0.15s ease, box-shadow 0.25s ease;
 }
 .recalc-btn:hover { transform: translateY(-1px); }
@@ -811,7 +811,7 @@ watch(result, (r, prev) => {
   color: #FFFFFF;
   box-shadow: 0 10px 28px rgba(121,183,64,0.40),
               inset 0 1px 0 rgba(255,255,255,0.30);
-  animation: phChipPulse 2.6s ease-in-out infinite;
+  animation: phChipPulse 1.8s ease-in-out infinite;
 }
 .ph-icon {
   width: 40px;
@@ -924,7 +924,7 @@ watch(result, (r, prev) => {
   opacity: 1;
   box-shadow: 0 10px 28px rgba(121,183,64,0.45),
               inset 0 1px 0 rgba(255,255,255,0.30);
-  animation: phCalcPulse 2s ease-in-out infinite;
+  animation: phCalcPulse 1.4s ease-in-out infinite;
 }
 .ph-calc-btn--ready:hover {
   transform: translateY(-2px);

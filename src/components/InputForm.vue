@@ -593,7 +593,7 @@ const guaranteedPeriodSliderStyle = computed(() => {
   font-weight: 500;
   text-transform: none;
   letter-spacing: 0;
-  animation: hintShift 1.6s ease-in-out infinite;
+  animation: hintShift 1.1s ease-in-out infinite;
 }
 @keyframes hintShift {
   0%, 100% {
@@ -854,7 +854,7 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 .attention-next .input-wrap {
   border-color: #A1C95A;
   border-radius: 10px;
-  animation: attentionPulse 1.6s ease-in-out infinite;
+  animation: attentionPulse 1.1s ease-in-out infinite;
   box-shadow: 0 0 0 0 rgba(161,201,90,0.55);
 }
 .attention-next .input-wrap .neu-input {
@@ -864,14 +864,14 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 }
 .attention-next .radio-group {
   border-radius: 12px;
-  animation: attentionPulseOutline 1.6s ease-in-out infinite;
+  animation: attentionPulseOutline 1.1s ease-in-out infinite;
 }
 .attention-next .term-slider {
   border-radius: 6px;
-  animation: attentionPulseOutline 1.6s ease-in-out infinite;
+  animation: attentionPulseOutline 1.1s ease-in-out infinite;
 }
 .attention-next .term-badge {
-  animation: termBadgePop 1.6s ease-in-out infinite;
+  animation: termBadgePop 1.1s ease-in-out infinite;
   transform-origin: center;
 }
 @keyframes termBadgePop {
@@ -907,31 +907,31 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   align-items: center;
   gap: 4px;
   margin-left: 8px;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: linear-gradient(135deg, #A1C95A, #5C8E2F);
   color: #FFFFFF;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: none;
   white-space: nowrap;
-  animation: pillBob 1.6s ease-in-out infinite;
+  animation: pillBob 1.1s ease-in-out infinite;
 }
 .next-pill::before {
   content: '←';
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 900;
 }
 
-/* DOB pill — sits to the right of the date input, may overlap the gender column */
+/* DOB pill — sits right next to the date input / calendar icon */
 .dob-group { position: relative; }
 .next-pill--floating {
   position: absolute;
   bottom: 9px;       /* aligns with input vertical center */
-  left: calc(100% + 8px);
+  left: calc(100% + 4px);
   margin-left: 0;
-  white-space: nowrap;
+  white-space: nowrap !important;
   z-index: 10;
   pointer-events: none;
 }
@@ -942,19 +942,19 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
 
 @media (max-width: 720px) {
   .next-pill {
-    font-size: 10px;
-    padding: 3px 8px;
+    font-size: 12px;
+    padding: 4px 10px;
     margin-left: 6px;
-    white-space: normal;
     line-height: 1.2;
   }
 }
 @media (max-width: 480px) {
   .next-pill {
     margin-left: 4px;
-    padding: 2px 6px;
-    font-size: 9px;
+    padding: 3px 8px;
+    font-size: 11px;
   }
+  .next-pill::before { font-size: 12px; }
 }
 @media (min-width: 1121px) {
   /* On desktop the placeholder + connector arrows already guide the user;
