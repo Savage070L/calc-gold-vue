@@ -16,7 +16,7 @@
           min="1900-01-01"
           class="neu-input"
         />
-        <span v-if="needsDob" class="next-pill next-pill--floating">{{ t('form.nextStepDob') }}</span>
+        <span v-if="needsDob" class="next-pill">{{ t('form.nextStepDob') }}</span>
       </div>
 
       <div class="form-group" :class="{ 'attention-next': needsGender }">
@@ -924,23 +924,27 @@ input[type="date"].neu-input::-webkit-calendar-picker-indicator:hover { opacity:
   font-weight: 900;
 }
 
-/* DOB pill — sits below the date input, pointing up at it */
-.dob-group { position: relative; }
-.next-pill--floating {
-  position: absolute;
-  top: calc(100% + 6px);          /* below the form-group */
-  left: 50%;
-  transform: translateX(-50%);
-  margin-left: 0;
-  white-space: nowrap !important;
-  z-index: 10;
-  pointer-events: none;
-  animation: pillBobUp 1.1s ease-in-out infinite !important;
-}
-.next-pill--floating::before {
-  content: '↑';
-  font-size: 13px;
-  font-weight: 900;
+/* All form-pills float below their form-group on mobile/tablet,
+   pointing up at the field. Riders pill (in InsuranceCalculator) is
+   in a different scope so this rule does NOT affect it. */
+.dob-group,
+.form-group { position: relative; }
+
+@media (max-width: 1120px) {
+  .next-pill {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin-left: 0 !important;
+    white-space: nowrap !important;
+    z-index: 10;
+    pointer-events: none;
+    animation: pillBobUp 1.1s ease-in-out infinite !important;
+  }
+  .next-pill::before {
+    content: '↑';
+  }
 }
 @keyframes pillBobUp {
   0%, 100% { transform: translateX(-50%) translateY(0); }
