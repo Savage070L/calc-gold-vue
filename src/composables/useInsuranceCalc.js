@@ -53,17 +53,21 @@ export function validateInputs(inputs) {
     annuityTerm,
     guaranteedPeriod,
   } = inputs;
-  const { minTerm, maxTerm, maxExitAge } = PRODUCT_CONFIG;
+  const { minTerm, maxTerm, maxExitAge, minAge } = PRODUCT_CONFIG;
 
   if (!dob) {
     errors.push(t('errors.dobRequired'));
   } else {
     const age = PolicyCalculator.calculateAge(dob);
-    if (age < 0 || age > 80) {
+    if (age < 0) {
       errors.push(t('errors.dobInvalid'));
+    } else if (minAge && age < minAge) {
+      errors.push(t('errors.minAge', { age, min: minAge }));
+    } else if (age + minTerm > maxExitAge) {
+      errors.push(t('errors.ageTooHigh', { age, maxAge: maxExitAge - minTerm, max: maxExitAge }));
     }
     const exitAge = age + (term || 0);
-    if (exitAge > maxExitAge) {
+    if (term && exitAge > maxExitAge) {
       errors.push(t('errors.exitAgeExceeds', { exitAge, max: maxExitAge }));
     }
   }
