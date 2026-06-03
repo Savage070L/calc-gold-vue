@@ -8,6 +8,7 @@ import { PolicyCalculator } from '../core/calculator.js';
 import { RidersCalculator } from '../core/riders.js';
 import { PRODUCT_CONFIG } from '../config/product.js';
 import { useI18n } from '../i18n/index.js';
+import { useCurrencyRate } from './useCurrencyRate.js';
 
 const ALLOWED_RIDERS = [
   'accidental_death',
@@ -53,7 +54,7 @@ export function validateInputs(inputs) {
     annuityTerm,
     guaranteedPeriod,
   } = inputs;
-  const { minTerm, maxTerm, maxExitAge, minAge } = PRODUCT_CONFIG;
+  const { minTerm, maxTerm, maxExitAge, minAge, minPremiumUsd } = PRODUCT_CONFIG;
 
   if (!dob) {
     errors.push(t('errors.dobRequired'));
@@ -90,6 +91,27 @@ export function validateInputs(inputs) {
     }
   } else if (!premium || premium <= 0) {
     errors.push(t('errors.premiumRequired'));
+  }
+
+  // Минимальный взнос (Pro Life Gold) — в долларах США.
+  //   • ежегодно (annual)   — не менее $1 000
+  //   • единовременно (single) — не менее $5 000
+  // Сравниваем premium (KZT) с (минимум USD × текущий курс).
+  if (mode === 'premium_to_sa' && frequency && minPremiumUsd && premium > 0) {
+    const minUsd = minPremiumUsd[frequency];
+    if (minUsd) {
+      const { usdRate } = useCurrencyRate();
+      const rate = usdRate?.value;
+      if (rate && rate > 0) {
+        const minKzt = minUsd * rate;
+        if (premium < minKzt) {
+          errors.push(t('errors.minPremium', {
+            frequency: t(`frequency.${frequency}`),
+            min: `$ ${formatMoney(minUsd)}`,
+          }));
+        }
+      }
+    }
   }
 
   if (enableAnnuity) {
