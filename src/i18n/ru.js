@@ -75,8 +75,8 @@ export default {
   },
 
   riders: {
-    groupDeath: 'СМЕРТЬ И ИНВАЛИДНОСТЬ',
-    groupTraumaHosp: 'ТРАВМЫ И ГОСПИТАЛИЗАЦИЯ',
+    groupDeath: '',
+    groupTraumaHosp: '',
     accidentalDeath: 'Смерть в результате НС',
     disability: 'Инвалидность І / ІІ группы в результате НС',
     trauma: 'Получение Застрахованным телесной травмы в результате НС',

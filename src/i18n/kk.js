@@ -75,8 +75,8 @@ export default {
   },
 
   riders: {
-    groupDeath: 'ӨЛІМ ЖӘНЕ МҮГЕДЕКТІК',
-    groupTraumaHosp: 'ЖАРАҚАТ ЖӘНЕ АУРУХАНАҒА ЖАТҚЫЗУ',
+    groupDeath: '',
+    groupTraumaHosp: '',
     accidentalDeath: 'ЖО салдарынан қайтыс болу',
     disability: 'ЖО салдарынан I / ІІ топтағы мүгедектікті белгілеу',
     trauma: 'Сақтандырылған тұлға ЖО салдарынан дене жарақаттарын алуы',
